@@ -2,23 +2,633 @@
   "locations": [
     {
       "id": 1,
-      "name": "Bahen 1F",
-      "brief_description": "You are on the first floor of the Bahen Center. There are elevators to the West, and an exit from the building to St. George street to the East. You see something shiny on the ground -- looks like a toonie?",
-      "long_description": "You are on the first floor of the Bahen Center. It's usually crowded at this time of the day, but today it's eerily quiet. Only a few students are studying at the table near the doors. You better not disturb them. One student is rushing down the corridor, wearing a heavy-looking backpack and carrying a textbook in their arms. There are elevators to the West, and an exit from the building to St. George street to the East.",
+      "name": "Dorm Room",
+      "brief_description": "LOCATION 1\nYour dorm room. Messy desk. Clock ticking.",
+      "long_description": "LOCATION 1\nYou’re in your dorm room—the one place that still feels safe. The desk is a landfill of\nprintouts, crumbs, and scribbled pseudocode. Your editor is open, PythonTA errors lurking like\nlandmines. This is the drop-off point: bring the missing essentials here before the deadline.\n\nExits: south (to King's College Road), west (to Dorm Hallway).",
       "available_commands": {
-        "go south": 4,
-        "go east": 2
+        "go south": 9,
+        "go west": 2
       },
-      "items": ["toonie"]
+      "items": []
+    },
+    {
+      "id": 2,
+      "name": "Dorm Hallway",
+      "brief_description": "LOCATION 2\nA quiet hallway outside your room.",
+      "long_description": "LOCATION 2\nThe dorm hallway is dim and oddly still, like everyone vanished mid-semester. A vending\nmachine hums with the confidence of a corporate villain. Someone left a few flyers on the floor,\ntrampled and unread.\n\nExits: east (back to Dorm Room), west (to Residence Lobby).",
+      "available_commands": {
+        "go east": 1,
+        "go west": 3
+      },
+      "items": [
+        "student card"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Residence Lobby",
+      "brief_description": "LOCATION 3\nThe residence lobby warm lights, cold air outside.",
+      "long_description": "LOCATION 3\nThe lobby smells faintly like microwaved noodles and winter coats. A front desk sits empty,\nwith a little bell that feels illegal to ring. Through the glass you can see campus paths stretching\nout like a maze.\n\nExits: east (to Dorm Hallway), west (toward Convocation Hall).",
+      "available_commands": {
+        "go east": 2,
+        "go west": 4
+      },
+      "items": [
+        "stapler"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Front Campus Path",
+      "brief_description": "LOCATION 4\nA wide stone path across front campus.",
+      "long_description": "LOCATION 4\nFront Campus is open and winter-bright, the kind of cold that makes your thoughts sharper and\nyour fingers slower. Your shoes scrape over stone. Somewhere nearby, a door slams and echoes.\n\nExits: east (toward Residence Lobby), west (to Convocation Steps).",
+      "available_commands": {
+        "go east": 3,
+        "go west": 5
+      },
+      "items": [
+        "campus map"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Convocation Steps",
+      "brief_description": "LOCATION 5\nQuiet steps outside Convocation Hall.",
+      "long_description": "LOCATION 5\nThe steps outside Convocation Hall are empty—no tours, no photos, no chaos. Just you, a big\nstone building, and the feeling that you’re forgetting something important. Wind funnels through\nthe space like it’s trying to hurry you.\n\nExits: east (back to Front Campus Path).",
+      "available_commands": {
+        "go east": 4
+      },
+      "items": [
+        "lucky mug"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Hart House Circle",
+      "brief_description": "LOCATION 6\nA calm circle near Hart House.",
+      "long_description": "LOCATION 6\nHart House sits like a stone promise—quiet, serious, and slightly intimidating. A few footprints\ncut across the snow like someone sprinted through with purpose. This spot feels like a junction,\na place where routes split and decisions matter.\n\nExits: north (to St. George Street Gate), south (to Residence Lobby hallway-path).",
+      "available_commands": {
+        "go north": 7,
+        "go south": 3
+      },
+      "items": [
+        "gym pass"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "St. George Street Gate",
+      "brief_description": "LOCATION 7\nCampus edge: traffic, wind, and the city.",
+      "long_description": "LOCATION 7\nHere the campus loosens its grip and Toronto rushes in. Cars hiss on wet pavement. A gust of\nwind yanks at your sleeves like it’s personally offended by your schedule.\n\nExits: south (to Hart House Circle), east (to Queen's Park Edge).",
+      "available_commands": {
+        "go south": 6,
+        "go east": 8
+      },
+      "items": [
+        "bus ticket"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Queen's Park Edge",
+      "brief_description": "LOCATION 8\nTrees, iron fences, and quiet air.",
+      "long_description": "LOCATION 8\nThe edge of Queen’s Park is quieter than it should be. Trees stand like dark pillars. A squirrel\nwatches you with the suspicion of a TA during office hours.\n\nExits: west (back to St. George Street Gate).",
+      "available_commands": {
+        "go west": 7
+      },
+      "items": [
+        "umbrella"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "King's College Road",
+      "brief_description": "LOCATION 9\nA campus road with footsteps and bike tracks.",
+      "long_description": "LOCATION 9\nKing’s College Road is a long corridor of movement—footsteps, bike tracks, and the occasional\nstudent power-walking like they’re late for their entire life.\n\nExits: north (to Dorm Room), east (to Robarts Plaza).",
+      "available_commands": {
+        "go north": 1,
+        "go east": 10
+      },
+      "items": [
+        "protein bar"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Robarts Plaza",
+      "brief_description": "LOCATION 10\nRobarts ahead—concrete and confidence.",
+      "long_description": "LOCATION 10\nRobarts rises in front of you like a brutalist spaceship. Students slip in and out like it’s a portal.\nYou can almost feel the weight of deadlines in the air.\n\nExits: west (to King's College Road), east (to Robarts Entrance).",
+      "available_commands": {
+        "go west": 9,
+        "go east": 11
+      },
+      "items": [
+        "sticky notes"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Robarts Entrance",
+      "brief_description": "LOCATION 11\nWarm air, security gates, and hushed voices.",
+      "long_description": "LOCATION 11\nThe entrance is a threshold: outside stress becomes inside stress, just quieter. The gates beep\nat someone nearby. A sign asks for silence with the authority of a final exam.\n\nExits: west (to Robarts Plaza), east (to Robarts Study Hall), north (to Sid Smith Hallway).",
+      "available_commands": {
+        "go west": 10,
+        "go east": 12,
+        "go north": 13
+      },
+      "items": [
+        "study timer"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Robarts Quiet Study",
+      "brief_description": "LOCATION 12\nSilent study—every sound feels illegal.",
+      "long_description": "LOCATION 12\nIt’s so quiet you can hear your own thoughts compiling. A student nearby has three monitors\nand the calm of someone who definitely backed up their files.\n\nExits: west (to Robarts Entrance).",
+      "available_commands": {
+        "go west": 11
+      },
+      "items": [
+        "usb drive"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Sid Smith Hallway",
+      "brief_description": "LOCATION 13\nA hallway with classroom doors and old posters.",
+      "long_description": "LOCATION 13\nSid Smith hallways feel like a conveyor belt for first-year panic. Posters advertise clubs you\nswore you’d join. Someone’s abandoned a coffee cup on a ledge like a warning.\n\nExits: south (to Robarts Entrance), north (to Sid Smith Lobby).",
+      "available_commands": {
+        "go south": 11,
+        "go north": 14
+      },
+      "items": [
+        "lecture notes"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Sid Smith Lobby",
+      "brief_description": "LOCATION 14\nOpen lobby; stairs and echoes.",
+      "long_description": "LOCATION 14\nThe lobby is brighter than the hallways, with echoes that make every footstep dramatic.\nThere’s a screen showing upcoming talks you don’t have time for.\n\nExits: south (to Sid Smith Hallway), east (to Philosopher's Walk North).",
+      "available_commands": {
+        "go south": 13,
+        "go east": 16
+      },
+      "items": [
+        "clicker"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Museum Lawn",
+      "brief_description": "LOCATION 15\nA cold open lawn near the museum.",
+      "long_description": "LOCATION 15\nThe museum lawn is wide and exposed. The city feels close here, like campus is just borrowing\na corner of Toronto for a while. Your breath fogs up your vision for a second—then clears.\n\nExits: south (to Philosopher's Walk North).",
+      "available_commands": {
+        "go south": 16
+      },
+      "items": [
+        "camera strap"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Philosopher's Walk North",
+      "brief_description": "LOCATION 16\nA tree-lined path, quieter than the roads.",
+      "long_description": "LOCATION 16\nPhilosopher’s Walk is calmer than everything else. Trees lean over the path like they’re trying\nto hear your plan. It’s a good place to think—dangerous, because thinking wastes moves.\n\nExits: west (to Sid Smith Lobby), east (to Varsity Gate), north (to Museum Lawn).",
+      "available_commands": {
+        "go west": 14,
+        "go east": 17,
+        "go north": 15
+      },
+      "items": [
+        "notebook"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Varsity Gate",
+      "brief_description": "LOCATION 17\nA gate near Varsity fields—windy and open.",
+      "long_description": "LOCATION 17\nThe Varsity gate opens onto open space. The wind hits harder here. The field looks empty,\nlike it’s waiting for a game that never starts.\n\nExits: west (to Philosopher's Walk North), south (to Bahen Side Entrance).",
+      "available_commands": {
+        "go west": 16,
+        "go south": 18
+      },
+      "items": [
+        "scarf"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Bahen Side Entrance",
+      "brief_description": "LOCATION 18\nBahen nearby—glass, light, and late-night energy.",
+      "long_description": "LOCATION 18\nEven from the side, Bahen glows. You can almost hear keyboards and quiet despair behind the\nglass. Someone taped a meme to the doorframe. It’s old, but still accurate.\n\nExits: north (to Varsity Gate), east (to Bahen Main Doors).",
+      "available_commands": {
+        "go north": 17,
+        "go east": 19
+      },
+      "items": [
+        "spare usb cable"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Bahen Main Doors",
+      "brief_description": "LOCATION 19\nMain doors, big atrium feel.",
+      "long_description": "LOCATION 19\nThe main doors feel like entering a different world: brighter, warmer, and full of people who\nlook like they forgot what sleep is. A security guard glances up, then back down.\n\nExits: west (to Bahen Side Entrance), south (to Bahen 1F).",
+      "available_commands": {
+        "go west": 18,
+        "go south": 20
+      },
+      "items": [
+        "toonie"
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Bahen 1F",
+      "brief_description": "LOCATION 20\nTables, outlets, and quiet concentration.",
+      "long_description": "LOCATION 20\nThe first floor is a sea of tables and charging cables. Someone has a mechanical keyboard\nthat sounds like it’s trying to start a war. You spot a familiar-looking charger brick… maybe.\n\nExits: north (to Bahen Main Doors), east (to Bahen 2F Labs).",
+      "available_commands": {
+        "go north": 19,
+        "go east": 21
+      },
+      "items": [
+        "laptop charger"
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Bahen 2F Labs",
+      "brief_description": "LOCATION 21\nLab machines and the glow of monitors.",
+      "long_description": "LOCATION 21\nRows of lab computers sit like an army. The fans whisper. A whiteboard is filled with half a\nproof and a doodle of a dragon. Classic.\n\nExits: west (to Bahen 1F), south (to Bookstore Back Door).",
+      "available_commands": {
+        "go west": 20,
+        "go south": 25
+      },
+      "items": [
+        "python cheat sheet"
+      ]
+    },
+    {
+      "id": 22,
+      "name": "College Street Corner",
+      "brief_description": "LOCATION 22\nStreet corner—cars, crosswalks, and rush.",
+      "long_description": "LOCATION 22\nThe street corner is loud. You wait for the light and bounce on your heels. Someone’s dropped\na pencil near the curb, like a tiny offering to the semester.\n\nExits: west (to Gerstein Lane), south (to St. Mike's Alley).",
+      "available_commands": {
+        "go west": 23,
+        "go south": 26
+      },
+      "items": [
+        "pencil"
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Gerstein Lane",
+      "brief_description": "LOCATION 23\nA narrow lane beside Gerstein.",
+      "long_description": "LOCATION 23\nA narrow lane funnels you between buildings. The air smells like cold stone and old books.\nThis feels like a place where lost items end up when nobody’s looking.\n\nExits: east (to College Street Corner), west (to Gerstein Entrance).",
+      "available_commands": {
+        "go east": 22,
+        "go west": 24
+      },
+      "items": [
+        "hand sanitizer"
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Gerstein Entrance",
+      "brief_description": "LOCATION 24\nQuiet library doors and medical posters.",
+      "long_description": "LOCATION 24\nGerstein’s entrance is calmer than you expect. Posters for health workshops line the walls.\nInside, you can see students who look like they’ve been awake since 2019.\n\nExits: east (to Gerstein Lane).",
+      "available_commands": {
+        "go east": 23
+      },
+      "items": [
+        "flashcard deck"
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Bookstore Back Door",
+      "brief_description": "LOCATION 25\nBack entrance—deliveries and stacked boxes.",
+      "long_description": "LOCATION 25\nBehind the bookstore, boxes are stacked like a poorly balanced Jenga tower. A receipt printer\nchirps somewhere inside. If you needed paper, pens, or a miracle—this is where you’d find it.\n\nExits: north (to Bahen 2F Labs).",
+      "available_commands": {
+        "go north": 21
+      },
+      "items": [
+        "printed report"
+      ]
+    },
+    {
+      "id": 26,
+      "name": "St. Mike's Alley",
+      "brief_description": "LOCATION 26\nA tucked-away alley, quiet and cold.",
+      "long_description": "LOCATION 26\nThis alley is the kind of place you never notice until you’re late and desperate. Snow piles up\nin corners. Your footsteps sound too loud.\n\nExits: north (to College Street Corner), east (to Cafe Alley).",
+      "available_commands": {
+        "go north": 22,
+        "go east": 27
+      },
+      "items": [
+        "blue pen"
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Cafe Alley",
+      "brief_description": "LOCATION 27\nSmell of coffee leaking through a side door.",
+      "long_description": "LOCATION 27\nThe smell is unfairly good. A side door is propped open with a wedge, and warm air spills out\nlike a trap designed to steal your time.\n\nExits: west (to St. Mike's Alley), east (to Student Commons).",
+      "available_commands": {
+        "go west": 26,
+        "go east": 28
+      },
+      "items": [
+        "coffee"
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Student Commons",
+      "brief_description": "LOCATION 28\nCouches, chatter, and exhausted faces.",
+      "long_description": "LOCATION 28\nPeople are slumped on couches like they’ve been defeated by midterms. Someone laughs too\nloudly. Someone else stares into their laptop like it’s a portal.\n\nExits: west (to Cafe Alley), east (to Help Desk Nook).",
+      "available_commands": {
+        "go west": 27,
+        "go east": 30
+      },
+      "items": [
+        "headphones",
+        "cookie",
+        "water bottle"
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Print Lab",
+      "brief_description": "LOCATION 29\nPrinters, paper trays, and toner smell.",
+      "long_description": "LOCATION 29\nThe print lab feels like a production line for deadlines. A printer jams, someone sighs, and the\nworld continues. A label maker sits on a table like it has authority.\n\nExits: west (to Help Desk Nook).",
+      "available_commands": {
+        "go west": 30
+      },
+      "items": [
+        "sticker sheet",
+        "spare paper"
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Help Desk Nook",
+      "brief_description": "LOCATION 30\nA tiny counter, a bell, and too many forms.",
+      "long_description": "LOCATION 30\nA tiny help desk nook with a bell you definitely shouldn’t ring. A stack of forms sits neatly,\nlike paperwork is a hobby. Someone left a calculator here—probably by accident, probably not.\n\nExits: west (to Student Commons), east (to Print Lab).",
+      "available_commands": {
+        "go west": 28,
+        "go east": 29
+      },
+      "items": [
+        "calculator",
+        "lab access form",
+        "marker"
+      ]
     }
   ],
   "items": [
     {
+      "name": "usb drive",
+      "description": "Your only copy of the project. Losing this is instant tragedy.",
+      "start_position": 12,
+      "target_position": 1,
+      "target_points": 20
+    },
+    {
+      "name": "laptop charger",
+      "description": "A familiar charger brick. Your battery is not going to survive without it.",
+      "start_position": 20,
+      "target_position": 1,
+      "target_points": 20
+    },
+    {
+      "name": "lucky mug",
+      "description": "The mug that carried you through every late night. You refuse to submit without it.",
+      "start_position": 5,
+      "target_position": 1,
+      "target_points": 20
+    },
+
+    {
+      "name": "student card",
+      "description": "Your UofT student card. You feel naked without it.",
+      "start_position": 2,
+      "target_position": 1,
+      "target_points": 2
+    },
+    {
+      "name": "stapler",
+      "description": "A small stapler. Weirdly comforting.",
+      "start_position": 3,
+      "target_position": 25,
+      "target_points": 1
+    },
+    {
+      "name": "campus map",
+      "description": "A folded campus map with coffee stains and a few frantic circles.",
+      "start_position": 4,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "gym pass",
+      "description": "A gym pass card. The universe is insisting you do cardio today.",
+      "start_position": 6,
+      "target_position": 6,
+      "target_points": 1
+    },
+    {
+      "name": "bus ticket",
+      "description": "An unpunched TTC transfer. It might still be valid… maybe.",
+      "start_position": 7,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "umbrella",
+      "description": "A battered umbrella that still pretends it works.",
+      "start_position": 8,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "protein bar",
+      "description": "Emergency calories. Tastes like cardboard. Still worth it.",
+      "start_position": 9,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "sticky notes",
+      "description": "A rainbow stack of reminders: \"FIX TYPES\", \"RUN PYTHONT A\", \"DON'T PANIC\".",
+      "start_position": 10,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "study timer",
+      "description": "A tiny timer. It makes time feel louder.",
+      "start_position": 11,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "lecture notes",
+      "description": "Messy lecture notes that look like they were written during turbulence.",
+      "start_position": 13,
+      "target_position": 1,
+      "target_points": 2
+    },
+    {
+      "name": "clicker",
+      "description": "An old lecture clicker. You haven’t used it in ages, but it’s still here.",
+      "start_position": 14,
+      "target_position": 14,
+      "target_points": 1
+    },
+    {
+      "name": "camera strap",
+      "description": "A camera strap with a cracked clip. Someone’s going to miss this.",
+      "start_position": 15,
+      "target_position": 3,
+      "target_points": 1
+    },
+    {
+      "name": "notebook",
+      "description": "A notebook with half-finished plans and a few surprisingly good ideas.",
+      "start_position": 16,
+      "target_position": 1,
+      "target_points": 2
+    },
+    {
+      "name": "scarf",
+      "description": "A warm scarf. Wearing it makes you feel 3% more competent.",
+      "start_position": 17,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "spare usb cable",
+      "description": "A spare USB cable. Small, but it could save your whole run.",
+      "start_position": 18,
+      "target_position": 1,
+      "target_points": 2
+    },
+    {
       "name": "toonie",
-      "description": "There is a toonie on the ground. Someone must have dropped it.",
-      "start_position": 1,
-      "target_position": 4,
+      "description": "A shiny toonie. It feels like the universe apologizing.",
+      "start_position": 19,
+      "target_position": 27,
+      "target_points": 1
+    },
+    {
+      "name": "python cheat sheet",
+      "description": "A handwritten syntax sheet: lists, dicts, and a warning about mutation.",
+      "start_position": 21,
+      "target_position": 1,
+      "target_points": 2
+    },
+    {
+      "name": "pencil",
+      "description": "A worn pencil with teeth marks. Someone was stressed.",
+      "start_position": 22,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "hand sanitizer",
+      "description": "A tiny bottle with the strongest smell known to humanity.",
+      "start_position": 23,
+      "target_position": 24,
+      "target_points": 1
+    },
+    {
+      "name": "flashcard deck",
+      "description": "A stack of flashcards. The top one says \"Big-O\" like a threat.",
+      "start_position": 24,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "printed report",
+      "description": "A printed draft. There are red marks on it. The paper looks judged.",
+      "start_position": 25,
+      "target_position": 1,
       "target_points": 5
+    },
+    {
+      "name": "blue pen",
+      "description": "A blue pen with ink that smudges your fingers instantly.",
+      "start_position": 26,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "coffee",
+      "description": "Coffee in a paper cup. It’s cold. It still works.",
+      "start_position": 27,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "headphones",
+      "description": "Headphones with one ear slightly louder than the other. Still great.",
+      "start_position": 28,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "cookie",
+      "description": "A wrapped cookie. Sugar is a strategy.",
+      "start_position": 28,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "water bottle",
+      "description": "A dented bottle. Hydration is the closest thing to free points in life.",
+      "start_position": 28,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "sticker sheet",
+      "description": "A sheet of tiny stickers. Completely unnecessary. Completely irresistible.",
+      "start_position": 29,
+      "target_position": 1,
+      "target_points": 1
+    },
+    {
+      "name": "spare paper",
+      "description": "A few clean pages. Rare. Valuable.",
+      "start_position": 29,
+      "target_position": 25,
+      "target_points": 1
+    },
+    {
+      "name": "calculator",
+      "description": "A solar calculator. It has seen worse semesters than you.",
+      "start_position": 30,
+      "target_position": 1,
+      "target_points": 2
+    },
+    {
+      "name": "lab access form",
+      "description": "A form that looks like it wants a signature you don’t have time to get.",
+      "start_position": 30,
+      "target_position": 30,
+      "target_points": 1
+    },
+    {
+      "name": "marker",
+      "description": "A dry-erase marker. It squeaks when it writes. Everyone hates it.",
+      "start_position": 30,
+      "target_position": 11,
+      "target_points": 1
     }
   ]
 }
+
