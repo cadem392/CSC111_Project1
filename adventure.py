@@ -90,8 +90,10 @@ class AdventureGame:
             locations[loc_data['id']] = location_obj
 
         items = []
-        # TODO: Add Item objects to the items list; your code should be structured similarly to the loop above
-        # YOUR CODE BELOW
+        for item_data in data['items']:  # Go through each element associated with the 'locations' key in the file
+            item_obj = Item(item_data['name'], item_data['start_position'], item_data['target_position'],
+                            item_data['target_points'])
+            items.append(item_obj)
 
         return locations, items
 
@@ -100,8 +102,10 @@ class AdventureGame:
         If no ID is provided, return the Location object associated with the current location.
         """
 
-        # TODO: Complete this method as specified
-        # YOUR CODE BELOW
+        if loc_id is None:
+            return self._locations[self.current_location_id]
+        else:
+            return self._locations[loc_id]
 
 
 if __name__ == "__main__":
@@ -129,10 +133,12 @@ if __name__ == "__main__":
         # TODO: Add new Event to game log to represent current game location
         #  Note that the <choice> variable should be the command which led to this event
         # YOUR CODE HERE
+        game_log.add_event(Event(location.id_num, location.brief_description), choice)
 
         # TODO: Depending on whether or not it's been visited before,
         #  print either full description (first time visit) or brief description (every subsequent visit) of location
         # YOUR CODE HERE
+        print(location.brief_description)
 
         # Display possible actions at this location
         print("What to do? Choose from: look, inventory, score, log, quit")

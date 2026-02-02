@@ -20,15 +20,12 @@ please consult our Course Syllabus.
 
 This file is Copyright (c) 2026 CSC111 Teaching Team
 """
-
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
 
-# TODO: Copy/paste your A1 event_logger code below, and modify it if needed to fit your game
-
-
+# Note: We have completed the Event class for you. Do NOT modify it here for A1.
 @dataclass
 class Event:
     """
@@ -53,13 +50,16 @@ class EventList:
     A linked list of game events.
 
     Instance Attributes:
-        - # TODO add descriptions of instance attributes here
+        - first: Event object representing the first game event, None if there are no game events
+        - last: Event object representing the last game event, None if there are no game events
 
     Representation Invariants:
-        - # TODO add any appropriate representation invariants, if needed
     """
     first: Optional[Event]
     last: Optional[Event]
+
+    # Note: You may ADD parameters/attributes/methods to this class as you see fit.
+    # But do not rename or remove any existing methods/attributes in this class
 
     def __init__(self) -> None:
         """Initialize a new empty event list."""
@@ -74,46 +74,128 @@ class EventList:
             print(f"Location: {curr.id_num}, Command: {curr.next_command}")
             curr = curr.next
 
-    # TODO: Complete the methods below, based on the given descriptions.
-    def is_empty(self) -> bool:
-        """Return whether this event list is empty."""
+    # Complete the methods below, based on the given descriptions. Do NOT change any of their specifications.
+    #  That is, the function headers (parameters, return type, etc.) must NOT be changed.
 
-        # TODO: Your code below
+    def is_empty(self) -> bool:
+        """Return whether this event list is empty.
+
+        >>> evnt_lst = EventList()
+        >>> evnt_lst.is_empty()
+        True
+        >>> evnt_lst.add_event(Event(1, "blah"))
+        >>> evnt_lst.is_empty()
+        False
+        """
+        return self.first is None
 
     def add_event(self, event: Event, command: str = None) -> None:
         """
         Add the given new event to the end of this event list.
         The given command is the command which was used to reach this new event, or None if this is the first
         event in the game.
+
+        >>> evnt_lst = EventList()
+        >>> evnt1 = Event(1, "blah")
+        >>> evnt2 = Event(2, "blah")
+        >>> evnt3 = Event(3, "blah")
+        >>> evnt_lst.add_event(evnt1)
+        >>> evnt_lst.add_event(evnt2, "added 2")
+        >>> evnt_lst.add_event(evnt3, "added 3")
+        >>> evnt_lst.first == evnt1
+        True
+
+        >>> evnt_lst.first.next_command == "added 2"
+        True
+
+        >>> evnt_lst.last == evnt3
+        True
+
+        >>> evnt_lst.is_empty()
+        False
+
+        >>> evnt_lst.last.prev == evnt2
+        True
         """
         # Hint: You should update the previous node's <next_command> as needed
 
-        # TODO: Your code below
+        last = self.last
+
+        if last is None:
+            self.first = event
+            self.last = event
+        else:
+            last.next_command = command
+            last.next = event
+            event.prev = last
+            self.last = event
 
     def remove_last_event(self) -> None:
         """
         Remove the last event from this event list.
         If the list is empty, do nothing.
+
+        >>> evnt_lst = EventList()
+        >>> evnt1 = Event(1, "blah")
+        >>> evnt2 = Event(2, "blah")
+        >>> evnt3 = Event(3, "blah")
+        >>> evnt_lst.add_event(evnt1)
+        >>> evnt_lst.add_event(evnt2, "added 2")
+        >>> evnt_lst.add_event(evnt3, "added 3")
+        >>> evnt_lst.remove_last_event()
+        >>> evnt_lst.last == evnt2
+        True
+        >>> evnt_lst.remove_last_event()
+        >>> evnt_lst.last == evnt1
+        True
+        >>> evnt_lst.remove_last_event()
+        >>> evnt_lst.is_empty()
+        True
         """
         # Hint: The <next_command> and <next> attributes for the new last event should be updated as needed
 
-        # TODO: Your code below
+        if self.last is None:
+            return
+        elif self.last.prev is None:
+            self.first = None
+            self.last = None
+        else:
+            self.last = self.last.prev
+            self.last.next_command = None
+            self.last.next = None
 
     def get_id_log(self) -> list[int]:
-        """Return a list of all location IDs visited for each event in this list, in sequence."""
+        """Return a list of all location IDs visited for each event in this list, in sequence.
 
-        # TODO: Your code below
+        >>> evnt_lst = EventList()
+        >>> evnt1 = Event(1, "blah")
+        >>> evnt2 = Event(2, "blah")
+        >>> evnt3 = Event(3, "blah")
+        >>> evnt_lst.add_event(evnt1)
+        >>> evnt_lst.add_event(evnt2, "added 2")
+        >>> evnt_lst.add_event(evnt3, "added 3")
+        >>> evnt_lst.get_id_log()
+        [1, 2, 3]
+        """
 
-    # Note: You may add other methods to this class as needed
+        curr = self.first
+        ids_so_far = []
+
+        while curr is not None:
+            ids_so_far.append(curr.id_num)
+            curr = curr.next
+
+        return ids_so_far
 
 
-if __name__ == "__main__":
-    pass
+if __name__ == '__main__':
+    # pass
     # When you are ready to check your work with python_ta, uncomment the following lines.
     # (Delete the "#" and space before each line.)
     # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'allowed-io': ['EventList.display_events'],
+        'disable': ['R1705', 'static_type_checker']
+    })
