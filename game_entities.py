@@ -39,6 +39,7 @@ class Location:
     # All locations in your game MUST be represented as an instance of this class.
 
     id_num: int
+    name: str
     brief_description: str
     long_description: str
     available_commands: dict[str, int]
@@ -66,9 +67,13 @@ class Item:
     # All item objects in your game MUST be represented as an instance of this class.
 
     name: str
+    description: str
     start_position: int
     target_position: int
     target_points: int
+
+    def __str__(self) -> str:
+        return self.name.capitalize() + " - " + self.description
 
 
 # Note: Other entities you may want to add, depending on your game plan:
