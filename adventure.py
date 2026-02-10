@@ -124,6 +124,16 @@ class AdventureGame:
         else:
             return False
 
+    def drop(self, item_name: str) -> bool:
+        """Drop an item from the given item name from your current location."""
+        curr_item = self.get_item(item_name)
+        curr_location = self.get_location()
+        if curr_item in self.inventory:
+            self.inventory.remove(curr_item)
+            curr_location.items.append(item_name)
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     # When you are ready to check your work with python_ta, uncomment the following lines.
@@ -169,7 +179,8 @@ if __name__ == "__main__":
 
         # Validate choice
         choice = input("\nEnter action: ").lower().strip()
-        while choice not in location.available_commands and choice not in menu and "take" not in choice:
+        while (choice not in location.available_commands and choice not in menu and
+               "take" not in choice and "drop" not in choice):
             print("That was an invalid option; try again.")
             choice = input("\nEnter action: ").lower().strip()
 
@@ -212,8 +223,17 @@ if __name__ == "__main__":
                 else:
                     print("No such item " + item + " here.")
 
+            elif "drop" in choice:
+                item = choice.split(maxsplit=1)[1]
+
+                if game.drop(item):
+                    print("You dropped " + item)
+                else:
+                    print("No such item " + item + " in inventory.")
+
             choice = input("\nEnter action: ").lower().strip()
-            while choice not in location.available_commands and choice not in menu and "take" not in choice:
+            while (choice not in location.available_commands and choice not in menu and
+                   "take" not in choice and "drop" not in choice):
                 print("That was an invalid option; try again.")
                 choice = input("\nEnter action: ").lower().strip()
 
