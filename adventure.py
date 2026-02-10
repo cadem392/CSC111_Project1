@@ -50,7 +50,7 @@ class AdventureGame:
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
     inventory: list[Item] = []
-    score: int
+    score: int = 0
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """
@@ -141,6 +141,15 @@ class AdventureGame:
         curr_item = self.get_item(item_name)
         if curr_item in self.inventory:
             print(curr_item.hint)
+
+    def check_quest(self, item_name: str) -> None:
+        curr_item = self.get_item(item_name)
+        curr_location = self.get_location()
+        if curr_item.target_position == curr_location.id_num:
+            print(curr_item.completion_text)
+            self.score += curr_item.target_points
+            print("Your score is now " + str(self.score))
+            curr_location.items.remove(item_name)
 
 
 if __name__ == "__main__":
@@ -235,6 +244,7 @@ if __name__ == "__main__":
 
                 if game.drop(item):
                     print("You dropped " + item)
+                    game.check_quest(item)
                 else:
                     print("No such item " + item + " in inventory.")
 
