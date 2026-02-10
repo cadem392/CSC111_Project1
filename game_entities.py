@@ -68,6 +68,8 @@ class Item:
 
     name: str
     description: str
+    hint: str
+    completion_text: str
     start_position: int
     target_position: int
     target_points: int
