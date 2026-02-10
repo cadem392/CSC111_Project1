@@ -49,6 +49,8 @@ class AdventureGame:
     _items: list[Item]
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
+    inventory: list[Item] = []
+    score: int
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """
@@ -85,13 +87,13 @@ class AdventureGame:
 
         locations = {}
         for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
-            location_obj = Location(loc_data['id'], loc_data['brief_description'], loc_data['long_description'],
+            location_obj = Location(loc_data['id'], loc_data['name'], loc_data['brief_description'], loc_data['long_description'],
                                     loc_data['available_commands'], loc_data['items'])
             locations[loc_data['id']] = location_obj
 
         items = []
         for item_data in data['items']:  # Go through each element associated with the 'locations' key in the file
-            item_obj = Item(item_data['name'], item_data['start_position'], item_data['target_position'],
+            item_obj = Item(item_data['name'], item_data['description'], item_data['start_position'], item_data['target_position'],
                             item_data['target_points'])
             items.append(item_obj)
 
@@ -106,6 +108,21 @@ class AdventureGame:
             return self._locations[self.current_location_id]
         else:
             return self._locations[loc_id]
+
+    def get_item(self, item_name: str) -> Optional[Item]:
+        """Return Item object associated with the provided item name."""
+        return next(item for item in self._items if item.name == item_name)
+
+    def pick_up(self, item_name: str) -> bool:
+        """Pick up an item from the given item name from your current location."""
+        curr_item = self.get_item(item_name)
+        curr_location = self.get_location()
+        if item_name in curr_location.items:
+            self.inventory.append(curr_item)
+            curr_location.items.remove(item_name)
+            return True
+        else:
+            return False
 
 
 if __name__ == "__main__":
@@ -138,7 +155,11 @@ if __name__ == "__main__":
         # TODO: Depending on whether or not it's been visited before,
         #  print either full description (first time visit) or brief description (every subsequent visit) of location
         # YOUR CODE HERE
-        print(location.brief_description)
+        if location.visited:
+            print(location.brief_description)
+        else:
+            location.visited = True
+            print(location.long_description)
 
         # Display possible actions at this location
         print("What to do? Choose from: look, inventory, score, log, quit")
@@ -148,23 +169,63 @@ if __name__ == "__main__":
 
         # Validate choice
         choice = input("\nEnter action: ").lower().strip()
-        while choice not in location.available_commands and choice not in menu:
+        while choice not in location.available_commands and choice not in menu and "take" not in choice:
             print("That was an invalid option; try again.")
             choice = input("\nEnter action: ").lower().strip()
 
         print("========")
         print("You decided to:", choice)
 
-        if choice in menu:
-            # TODO: Handle each menu command as appropriate
+
+        while choice not in location.available_commands:
+
             if choice == "log":
                 game_log.display_events()
-            # ENTER YOUR CODE BELOW to handle other menu commands (remember to use helper functions as appropriate)
 
-        else:
-            # Handle non-menu actions
-            result = location.available_commands[choice]
-            game.current_location_id = result
+            elif choice == "look":
+                print(location.long_description)
+                if len(location.items) > 0:
+                    print("Items In " + location.name)
+                    for item in location.items:
+                        print(game.get_item(item))
+                else:
+                    print("No Items In " + location.name)
 
-            # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
-            # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
+            elif choice == "inventory":
+                if len(game.inventory) > 0:
+                    for item in game.inventory:
+                        print(item)
+                else:
+                    print("No Items In Your Inventory")
+
+            elif choice == "score":
+                print(game.score)
+
+            elif choice == "log":
+                game_log.display_events()
+
+            elif "take" in choice:
+                item = choice.split(maxsplit=1)[1]
+
+                if game.pick_up(item):
+                    print("You picked up " + item)
+                else:
+                    print("No such item " + item + " here.")
+
+            choice = input("\nEnter action: ").lower().strip()
+            while choice not in location.available_commands and choice not in menu and "take" not in choice:
+                print("That was an invalid option; try again.")
+                choice = input("\nEnter action: ").lower().strip()
+
+            print("========")
+            print("You decided to:", choice)
+
+        # ENTER YOUR CODE BELOW to handle other menu commands (remember to use helper functions as appropriate)
+        # Handle non-menu actions
+        result = location.available_commands[choice]
+        game.current_location_id = result
+
+        # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
+        # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
+
+
