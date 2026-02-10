@@ -87,13 +87,14 @@ class AdventureGame:
 
         locations = {}
         for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
-            location_obj = Location(loc_data['id'], loc_data['name'], loc_data['brief_description'], loc_data['long_description'],
-                                    loc_data['available_commands'], loc_data['items'])
+            location_obj = Location(loc_data['id'], loc_data['name'], loc_data['brief_description'],
+                                    loc_data['long_description'], loc_data['available_commands'], loc_data['items'])
             locations[loc_data['id']] = location_obj
 
         items = []
         for item_data in data['items']:  # Go through each element associated with the 'locations' key in the file
-            item_obj = Item(item_data['name'], item_data['description'], item_data['start_position'], item_data['target_position'],
+            item_obj = Item(item_data['name'], item_data['description'], item_data['hint'],
+                            item_data['completion_text'], item_data['start_position'], item_data['target_position'],
                             item_data['target_points'])
             items.append(item_obj)
 
@@ -111,7 +112,7 @@ class AdventureGame:
 
     def get_item(self, item_name: str) -> Optional[Item]:
         """Return Item object associated with the provided item name."""
-        return next(item for item in self._items if item.name == item_name)
+        return next(i for i in self._items if i.name == item_name)
 
     def pick_up(self, item_name: str) -> bool:
         """Pick up an item from the given item name from your current location."""
@@ -134,6 +135,13 @@ class AdventureGame:
             return True
         else:
             return False
+
+    def inspect(self, item_name: str) -> None:
+        """Inspect an item from the given item name from your inventory."""
+        curr_item = self.get_item(item_name)
+        if curr_item in self.inventory:
+            print(curr_item.hint)
+
 
 if __name__ == "__main__":
     # When you are ready to check your work with python_ta, uncomment the following lines.
@@ -172,7 +180,7 @@ if __name__ == "__main__":
             print(location.long_description)
 
         # Display possible actions at this location
-        print("What to do? Choose from: look, inventory, score, log, quit")
+        print("What to do? Choose from: look, inventory, score, log, quit, take <item>, drop <item>, inspect <item>")
         print("At this location, you can also:")
         for action in location.available_commands:
             print("-", action)
@@ -180,13 +188,12 @@ if __name__ == "__main__":
         # Validate choice
         choice = input("\nEnter action: ").lower().strip()
         while (choice not in location.available_commands and choice not in menu and
-               "take" not in choice and "drop" not in choice):
+               "take" not in choice and "drop" not in choice and "inspect" not in choice):
             print("That was an invalid option; try again.")
             choice = input("\nEnter action: ").lower().strip()
 
         print("========")
         print("You decided to:", choice)
-
 
         while choice not in location.available_commands:
 
@@ -231,9 +238,13 @@ if __name__ == "__main__":
                 else:
                     print("No such item " + item + " in inventory.")
 
+            elif "inspect" in choice:
+                item = choice.split(maxsplit=1)[1]
+                game.inspect(item)
+
             choice = input("\nEnter action: ").lower().strip()
             while (choice not in location.available_commands and choice not in menu and
-                   "take" not in choice and "drop" not in choice):
+                   "take" not in choice and "drop" not in choice and "inspect" not in choice):
                 print("That was an invalid option; try again.")
                 choice = input("\nEnter action: ").lower().strip()
 
@@ -247,5 +258,3 @@ if __name__ == "__main__":
 
         # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
         # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
-
-
