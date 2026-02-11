@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import pygame
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable, Optional, Sequence
 
 # --- CHANGE THIS IMPORT IF NEEDED ---
@@ -26,26 +27,33 @@ from event_logger import EventList, Event
 
 
 # =====================================================
-# Theme (UofT-inspired)
+# Theme (ACORN-inspired, light dashboard style)
 # =====================================================
 
-UOFT_BLUE = (0, 46, 93)
-UOFT_LIGHT_BLUE = (0, 88, 163)
+UOFT_BLUE = (9, 48, 102)
+UOFT_LIGHT_BLUE = (0, 101, 179)
 UOFT_GOLD = (255, 205, 0)
 
-BG_TOP = (9, 11, 16)
-BG_BOTTOM = (6, 8, 12)
+BG_TOP = (245, 248, 253)
+BG_BOTTOM = (234, 240, 250)
 
-PANEL = (18, 22, 30)
-CARD = (24, 29, 39)
-CARD_2 = (30, 36, 48)
+TOPBAR = (9, 48, 102)
+PANEL = (238, 244, 253)
+CARD = (255, 255, 255)
+CARD_2 = (244, 249, 255)
 
-BORDER = (80, 95, 125)
-BORDER_SOFT = (64, 76, 102)
+BORDER = (188, 204, 228)
+BORDER_SOFT = (211, 223, 241)
 
-TEXT = (242, 246, 252)
-TEXT_DIM = (185, 195, 215)
-MUTED = (140, 150, 170)
+TEXT = (20, 36, 61)
+TEXT_DIM = (53, 83, 126)
+MUTED = (110, 129, 158)
+WHITE = (255, 255, 255)
+
+SHADOW = (30, 56, 95, 28)
+HOVER_SHADOW = (30, 56, 95, 42)
+
+LOGO_FILE = Path(__file__).resolve().parent / "assets" / "uoft_coa.png"
 
 
 # =====================================================
@@ -72,9 +80,40 @@ def draw_card(surface: pygame.Surface, rect: pygame.Rect,
               border: tuple[int, int, int] = BORDER,
               radius: int = 14,
               border_w: int = 2) -> None:
-    """Draw a rounded card with a border."""
+    """Draw a rounded card with a subtle drop shadow and border."""
+    shadow = pygame.Surface((rect.width + 8, rect.height + 8), pygame.SRCALPHA)
+    pygame.draw.rect(shadow, SHADOW, shadow.get_rect(), border_radius=radius + 2)
+    surface.blit(shadow, (rect.x + 2, rect.y + 3))
     pygame.draw.rect(surface, fill, rect, border_radius=radius)
     pygame.draw.rect(surface, border, rect, width=border_w, border_radius=radius)
+
+
+def draw_chip(surface: pygame.Surface, rect: pygame.Rect, text: str,
+              font: pygame.font.Font, fill: tuple[int, int, int],
+              fg: tuple[int, int, int]) -> None:
+    """Draw a pill-style status chip."""
+    pygame.draw.rect(surface, fill, rect, border_radius=rect.height // 2)
+    pygame.draw.rect(surface, BORDER, rect, width=1, border_radius=rect.height // 2)
+    label = font.render(text, True, fg)
+    surface.blit(label, label.get_rect(center=rect.center))
+
+
+def draw_uoft_logo(surface: pygame.Surface, center: tuple[int, int],
+                   ring_color: tuple[int, int, int], accent_color: tuple[int, int, int],
+                   glyph_font: pygame.font.Font) -> None:
+    """Draw a simple UofT-style seal mark for the top bar."""
+    cx, cy = center
+    pygame.draw.circle(surface, ring_color, (cx, cy), 24, 2)
+    pygame.draw.circle(surface, accent_color, (cx, cy), 20, 1)
+    pygame.draw.line(surface, accent_color, (cx - 10, cy + 11), (cx + 10, cy + 11), 1)
+
+    # Minimal crest glyph.
+    pygame.draw.rect(surface, ring_color, pygame.Rect(cx - 2, cy - 9, 4, 14))
+    pygame.draw.polygon(surface, ring_color, [(cx - 5, cy - 9), (cx + 5, cy - 9), (cx, cy - 14)])
+    pygame.draw.rect(surface, ring_color, pygame.Rect(cx - 7, cy - 3, 3, 8))
+    pygame.draw.rect(surface, ring_color, pygame.Rect(cx + 4, cy - 3, 3, 8))
+    glyph = glyph_font.render("U", True, ring_color)
+    surface.blit(glyph, glyph.get_rect(center=(cx, cy + 6)))
 
 
 def wrap_text(text: str, font: pygame.font.Font, width: int) -> list[str]:
@@ -120,21 +159,28 @@ class Button:
         if self.kind == "primary":
             base = UOFT_BLUE
             hover = UOFT_LIGHT_BLUE
+            txt_color = WHITE
         elif self.kind == "ghost":
             base = CARD
-            hover = CARD_2
+            hover = (238, 246, 255)
+            txt_color = TEXT
         else:
             base = CARD_2
-            hover = (40, 48, 64)
+            hover = (232, 241, 253)
+            txt_color = TEXT_DIM
 
         fill = hover if hovered else base
         if not self.enabled:
-            fill = (35, 40, 52)
+            fill = (235, 239, 246)
+            txt_color = MUTED
 
+        shadow = pygame.Surface((r.width + 6, r.height + 6), pygame.SRCALPHA)
+        shadow_color = HOVER_SHADOW if hovered else SHADOW
+        pygame.draw.rect(shadow, shadow_color, shadow.get_rect(), border_radius=13)
+        surface.blit(shadow, (r.x + 1, r.y + 2))
         pygame.draw.rect(surface, fill, r, border_radius=12)
         pygame.draw.rect(surface, BORDER_SOFT, r, width=2, border_radius=12)
 
-        txt_color = TEXT if self.enabled else MUTED
         text = font.render(self.label, True, txt_color)
         surface.blit(text, text.get_rect(center=r.center))
 
@@ -187,7 +233,7 @@ class ScrollArea:
             return
 
         track = pygame.Rect(self.rect.right - 8, self.rect.y + 6, 4, self.rect.height - 12)
-        pygame.draw.rect(surface, (60, 70, 90), track, border_radius=3)
+        pygame.draw.rect(surface, BORDER_SOFT, track, border_radius=3)
 
         thumb_h = max(18, int(track.height * (self.rect.height / self.content_height)))
         max_off = self.content_height - self.rect.height
@@ -195,7 +241,7 @@ class ScrollArea:
         thumb_y = track.y + int((track.height - thumb_h) * t)
 
         thumb = pygame.Rect(track.x, thumb_y, track.width, thumb_h)
-        pygame.draw.rect(surface, (120, 135, 160), thumb, border_radius=3)
+        pygame.draw.rect(surface, UOFT_LIGHT_BLUE, thumb, border_radius=3)
 
 
 # =====================================================
@@ -275,7 +321,7 @@ class ModalPicker:
              btn_font: pygame.font.Font, mouse_pos: tuple[int, int]) -> None:
         """Render the modal with a dark overlay + clipped scroll list."""
         overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 160))
+        overlay.fill((14, 40, 86, 88))
         surface.blit(overlay, (0, 0))
 
         draw_card(surface, self.panel, CARD, radius=16)
@@ -444,8 +490,8 @@ class MiniMap:
             x2, y2 = to_screen(v)
 
             mid = (x2, y1)  # elbow
-            pygame.draw.line(surface, (120, 135, 160), (x1, y1), mid, 2)
-            pygame.draw.line(surface, (120, 135, 160), mid, (x2, y2), 2)
+            pygame.draw.line(surface, BORDER, (x1, y1), mid, 2)
+            pygame.draw.line(surface, BORDER, mid, (x2, y2), 2)
 
         # Draw nodes (current highlighted)
         for lid in sorted(self.pos.keys()):
@@ -453,10 +499,10 @@ class MiniMap:
 
             if lid == current_id:
                 pygame.draw.circle(surface, UOFT_GOLD, (x, y), 8)
-                pygame.draw.circle(surface, (0, 0, 0), (x, y), 8, 2)
+                pygame.draw.circle(surface, UOFT_BLUE, (x, y), 8, 2)
             else:
-                pygame.draw.circle(surface, UOFT_BLUE, (x, y), 5)
-                pygame.draw.circle(surface, (0, 0, 0), (x, y), 5, 2)
+                pygame.draw.circle(surface, UOFT_LIGHT_BLUE, (x, y), 5)
+                pygame.draw.circle(surface, WHITE, (x, y), 5, 2)
 
 
 # =====================================================
@@ -517,12 +563,14 @@ class GameUI:
                     label_font: pygame.font.Font, body_font: pygame.font.Font) -> None:
         """Draw a scrollable output card with proper clipping."""
         draw_card(surface, rect, CARD, radius=16)
-        label = label_font.render("Output", True, TEXT_DIM)
+        label = label_font.render("OUTPUT", True, TEXT_DIM)
         surface.blit(label, (rect.x + 18, rect.y + 10))
 
         header_h = 34
         inner = pygame.Rect(rect.x + 18, rect.y + header_h,
                             rect.width - 36, rect.height - header_h - 16)
+        pygame.draw.rect(surface, CARD_2, inner, border_radius=10)
+        pygame.draw.rect(surface, BORDER_SOFT, inner, width=1, border_radius=10)
 
         if self.output_scroll is None:
             self.output_scroll = ScrollArea(inner)
@@ -679,13 +727,22 @@ class GameUI:
         """Run the UI main loop."""
         pygame.init()
         screen = pygame.display.set_mode((1280, 720))
-        pygame.display.set_caption("CSC111 Adventure")
+        pygame.display.set_caption("CSC111 Adventure - ACORN UI")
         clock = pygame.time.Clock()
 
-        title_font = pygame.font.SysFont("arial", 26, bold=True)
-        label_font = pygame.font.SysFont("arial", 16, bold=True)
-        body_font = pygame.font.SysFont("arial", 18)
-        cmd_font = pygame.font.SysFont("arial", 16)
+        title_font = pygame.font.SysFont("segoeui", 26, bold=True)
+        label_font = pygame.font.SysFont("segoeui", 15, bold=True)
+        body_font = pygame.font.SysFont("segoeui", 18)
+        cmd_font = pygame.font.SysFont("segoeui", 16)
+        chip_font = pygame.font.SysFont("segoeui", 14, bold=True)
+        topbar_title_font = pygame.font.SysFont("segoeui", 21, bold=True)
+        topbar_sub_font = pygame.font.SysFont("segoeui", 13)
+        logo_font = pygame.font.SysFont("segoeui", 11, bold=True)
+
+        logo_image: Optional[pygame.Surface] = None
+        if LOGO_FILE.exists():
+            raw_logo = pygame.image.load(str(LOGO_FILE)).convert_alpha()
+            logo_image = pygame.transform.smoothscale(raw_logo, (62, 62))
 
         self.begin_turn("Start")
         self.out(self.location_description())
@@ -697,12 +754,15 @@ class GameUI:
 
             pad = 20
             gap = 16
+            topbar_h = 96
 
             left_w = 820
             right_w = screen.get_width() - (pad * 2) - left_w - gap
 
-            left_panel = pygame.Rect(pad, pad, left_w, screen.get_height() - pad * 2)
-            right_panel = pygame.Rect(left_panel.right + gap, pad, right_w, left_panel.height)
+            panel_y = pad + topbar_h + 10
+            panel_h = screen.get_height() - panel_y - pad
+            left_panel = pygame.Rect(pad, panel_y, left_w, panel_h)
+            right_panel = pygame.Rect(left_panel.right + gap, panel_y, right_w, left_panel.height)
 
             # LEFT cards
             header_h = 78
@@ -824,20 +884,63 @@ class GameUI:
             # ---------------- Draw ----------------
             screen.blit(vertical_gradient(screen.get_size(), BG_TOP, BG_BOTTOM), (0, 0))
 
+            topbar = pygame.Rect(0, 0, screen.get_width(), topbar_h + 8)
+            pygame.draw.rect(screen, TOPBAR, topbar)
+            pygame.draw.line(screen, UOFT_GOLD, (0, topbar.bottom - 2), (screen.get_width(), topbar.bottom - 2), 2)
+
+            logo_x = pad + 4
+            logo_y = topbar.centery - 31
+            if logo_image is not None:
+                screen.blit(logo_image, (logo_x, logo_y))
+            else:
+                draw_uoft_logo(screen, (pad + 34, topbar.centery), WHITE, UOFT_GOLD, logo_font)
+
+            brand = topbar_title_font.render("University of Toronto", True, WHITE)
+            subtitle = topbar_sub_font.render("CSC111 Adventure Portal", True, (226, 236, 250))
+            screen.blit(brand, (pad + 84, 28))
+            screen.blit(subtitle, (pad + 84, 58))
+
             draw_card(screen, left_panel, PANEL, radius=16)
             draw_card(screen, right_panel, PANEL, radius=16)
 
             # Header
             draw_card(screen, header_rect, CARD, radius=16)
+            accent = pygame.Rect(header_rect.x + 2, header_rect.y + 2, 8, header_rect.height - 4)
+            pygame.draw.rect(screen, UOFT_LIGHT_BLUE, accent, border_radius=6)
+
             header_title = title_font.render(loc.name, True, TEXT)
-            header_sub = body_font.render(f"Location ID: {loc.id_num}   •   Score: {self.game.score}" +
-                                          f"   •   Turns left: {self.game.max_turns - self.game.turn}", True, TEXT_DIM)
-            screen.blit(header_title, (header_rect.x + 18, header_rect.y + 14))
-            screen.blit(header_sub, (header_rect.x + 18, header_rect.y + 44))
+            screen.blit(header_title, (header_rect.x + 20, header_rect.y + 12))
+
+            turns_left = self.game.max_turns - self.game.turn
+            chips_y = header_rect.y + 44
+            draw_chip(
+                screen,
+                pygame.Rect(header_rect.x + 20, chips_y, 114, 24),
+                f"Location {loc.id_num}",
+                chip_font,
+                (235, 244, 255),
+                TEXT_DIM
+            )
+            draw_chip(
+                screen,
+                pygame.Rect(header_rect.x + 142, chips_y, 102, 24),
+                f"Score {self.game.score}",
+                chip_font,
+                (238, 252, 244),
+                (27, 100, 75)
+            )
+            draw_chip(
+                screen,
+                pygame.Rect(header_rect.x + 252, chips_y, 118, 24),
+                f"Moves left {turns_left}",
+                chip_font,
+                (255, 247, 233),
+                (128, 78, 17)
+            )
 
             # Description
             draw_card(screen, desc_rect, CARD, radius=16)
-            screen.blit(label_font.render("Description", True, TEXT_DIM), (desc_rect.x + 18, desc_rect.y + 10))
+            screen.blit(label_font.render("DESCRIPTION", True, TEXT_DIM), (desc_rect.x + 18, desc_rect.y + 10))
 
             desc_text = loc.brief_description if getattr(loc, "visited", False) else loc.long_description
             lines = wrap_text(desc_text, body_font, desc_rect.width - 36)
@@ -850,7 +953,7 @@ class GameUI:
 
             # Items
             draw_card(screen, items_rect, CARD, radius=16)
-            screen.blit(label_font.render("Items here", True, TEXT_DIM), (items_rect.x + 18, items_rect.y + 10))
+            screen.blit(label_font.render("ITEMS HERE", True, TEXT_DIM), (items_rect.x + 18, items_rect.y + 10))
             if not loc.items:
                 items_str = "(none)"
             else:
@@ -865,13 +968,13 @@ class GameUI:
 
             # Minimap
             draw_card(screen, map_rect, CARD, radius=16)
-            screen.blit(label_font.render("Minimap", True, TEXT_DIM), (map_rect.x + 18, map_rect.y + 10))
+            screen.blit(label_font.render("MINIMAP", True, TEXT_DIM), (map_rect.x + 18, map_rect.y + 10))
             map_inner = pygame.Rect(map_rect.x + 14, map_rect.y + 36, map_rect.width - 28, map_rect.height - 50)
             self.minimap.draw(screen, map_inner, loc.id_num)
 
             # Actions card + header
             draw_card(screen, actions_card, CARD, radius=16)
-            screen.blit(label_font.render("Actions", True, TEXT_DIM), (actions_card.x + 18, actions_card.y + 10))
+            screen.blit(label_font.render("ACTIONS", True, TEXT_DIM), (actions_card.x + 18, actions_card.y + 10))
 
             # Scrollable actions content, clipped so it stays "behind" the card
             if self.actions_scroll is not None:
