@@ -654,10 +654,13 @@ class GameUI:
         self.log.add_event(Event(loc.id_num, loc.brief_description), command_key)
         self.game.turn += 1
         if self.game.max_turns == self.game.turn:
-            if self.game.score >= self.game.min_score and self.game.returned:
+            if (self.game.score >= self.game.min_score and "lucky mug" in self.game.returned and
+                    "usb drive" in self.game.returned and "laptop charger" in self.game.returned):
                 self.win()
+                return
             else:
                 self.lose()
+                return
         self.out(self.location_description())
         if new_loc.items:
             self.out("Items here: " + ", ".join(new_loc.items))
@@ -891,7 +894,7 @@ class GameUI:
 
             # Modal
             if self.modal is not None:
-                self.modal.layout(screen.get_rect(), body_font)
+                self.modal.layout(screen.get_rect())
                 self.modal.draw(screen, title_font, body_font, mouse_pos)
 
             pygame.display.flip()
