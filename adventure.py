@@ -52,6 +52,12 @@ class AdventureGame:
     ongoing: bool  # Suggested attribute, can be removed
     inventory: list[Item] = []
     score: int = 0
+    turn: int = 0
+    max_turns: int = 67
+    min_score: int = 50
+    returned: set[str] = set()
+
+
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """
@@ -102,6 +108,10 @@ class AdventureGame:
             valid_items.add(item_data['name'])
 
         return locations, items, valid_items
+
+    def location_dict(self) -> dict[int, Location]:
+        """Return a dictionary of all available locations IDs."""
+        return self._locations.copy()
 
     def get_location(self, loc_id: Optional[int] = None) -> Location:
         """Return Location object associated with the provided location ID.
@@ -157,6 +167,7 @@ class AdventureGame:
         curr_location = self.get_location()
         if curr_item.target_position == curr_location.id_num:
             print(curr_item.completion_text)
+            self.returned.add(item_name)
             self.score += curr_item.target_points
             print("Your score is now " + str(self.score))
             curr_location.items.remove(item_name)
