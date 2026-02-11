@@ -134,7 +134,8 @@
       "available_commands": {
         "go west": 10,
         "go east": 12,
-        "go north": 13
+        "go north": 13,
+        "go south": 31
       },
       "items": [
         "study timer"
@@ -366,7 +367,8 @@
       "brief_description": "LOCATION 29\nPrinters, paper trays, and toner smell.",
       "long_description": "LOCATION 29\nThe print lab feels like a production line for deadlines. A printer jams, someone sighs, and the\nworld continues. A label maker sits on a table like it has authority.\n\nExits: west (to Help Desk Nook).",
       "available_commands": {
-        "go west": 30
+        "go west": 30,
+        "go north": 31
       },
       "items": [
         "sticker sheet",
@@ -394,8 +396,8 @@
       "brief_description": "LOCATION 31\nA narrow underground tunnel beneath campus.",
       "long_description": "LOCATION 31\nThe tunnel is low and concrete-lined, lit by flickering fluorescent lights that hum just loudly\n enough to be unsettling. Old pipes run along the ceiling, wrapped in peeling insulation. This\n feels like infrastructure students were never meant to see—just a forgotten artery beneath\n campus, connecting places without asking permission.\n\nExits: west (to Robarts Entrance), east (to Print Lab).",
       "available_commands": {
-        "go west": 11,
-        "go east": 29
+        "go north": 11,
+        "go south": 29
       },
       "items": []
     }

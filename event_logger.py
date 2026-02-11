@@ -74,6 +74,15 @@ class EventList:
             print(f"Location: {curr.id_num}, Command: {curr.next_command}")
             curr = curr.next
 
+    def get_events_str(self) -> str:
+        """Get a string representation of the current event."""
+        curr = self.first
+        string = ""
+        while curr:
+            string += str(f"Location: {curr.id_num}, Command: {curr.next_command} \n")
+            curr = curr.next
+        return string
+
     # Complete the methods below, based on the given descriptions. Do NOT change any of their specifications.
     #  That is, the function headers (parameters, return type, etc.) must NOT be changed.
 
