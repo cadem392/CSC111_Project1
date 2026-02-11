@@ -57,8 +57,6 @@ class AdventureGame:
     min_score: int = 50
     returned: set[str] = set()
 
-
-
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
         """
         Initialize a new text adventure game, based on the data in the given file, setting starting location of game
