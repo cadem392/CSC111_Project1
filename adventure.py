@@ -47,6 +47,7 @@ class AdventureGame:
 
     _locations: dict[int, Location]
     _items: list[Item]
+    _valid_items: set[Item]
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
     inventory: list[Item] = []
@@ -70,14 +71,14 @@ class AdventureGame:
         # 2. Make sure the Item class is used to represent each item.
 
         # Suggested helper method (you can remove and load these differently if you wish to do so):
-        self._locations, self._items = self._load_game_data(game_data_file)
+        self._locations, self._items, self._valid_items = self._load_game_data(game_data_file)
 
         # Suggested attributes (you can remove and track these differently if you wish to do so):
         self.current_location_id = initial_location_id  # game begins at this location
         self.ongoing = True  # whether the game is ongoing
 
     @staticmethod
-    def _load_game_data(filename: str) -> tuple[dict[int, Location], list[Item]]:
+    def _load_game_data(filename: str) -> tuple[dict[int, Location], list[Item], set[str]]:
         """Load locations and items from a JSON file with the given filename and
         return a tuple consisting of (1) a dictionary of locations mapping each game location's ID to a Location object,
         and (2) a list of all Item objects."""
@@ -92,13 +93,15 @@ class AdventureGame:
             locations[loc_data['id']] = location_obj
 
         items = []
+        valid_items = set()
         for item_data in data['items']:  # Go through each element associated with the 'locations' key in the file
             item_obj = Item(item_data['name'], item_data['description'], item_data['hint'],
                             item_data['completion_text'], item_data['start_position'], item_data['target_position'],
                             item_data['target_points'])
             items.append(item_obj)
+            valid_items.add(item_data['name'])
 
-        return locations, items
+        return locations, items, valid_items
 
     def get_location(self, loc_id: Optional[int] = None) -> Location:
         """Return Location object associated with the provided location ID.
@@ -116,6 +119,8 @@ class AdventureGame:
 
     def pick_up(self, item_name: str) -> bool:
         """Pick up an item from the given item name from your current location."""
+        if item_name not in self._valid_items:
+            return False
         curr_item = self.get_item(item_name)
         curr_location = self.get_location()
         if item_name in curr_location.items:
@@ -127,6 +132,8 @@ class AdventureGame:
 
     def drop(self, item_name: str) -> bool:
         """Drop an item from the given item name from your current location."""
+        if item_name not in self._valid_items:
+            return False
         curr_item = self.get_item(item_name)
         curr_location = self.get_location()
         if curr_item in self.inventory:
@@ -138,11 +145,14 @@ class AdventureGame:
 
     def inspect(self, item_name: str) -> None:
         """Inspect an item from the given item name from your inventory."""
+        if item_name not in self._valid_items:
+            return
         curr_item = self.get_item(item_name)
         if curr_item in self.inventory:
             print(curr_item.hint)
 
     def check_quest(self, item_name: str) -> None:
+        """Check if an item is in the target location."""
         curr_item = self.get_item(item_name)
         curr_location = self.get_location()
         if curr_item.target_position == curr_location.id_num:
