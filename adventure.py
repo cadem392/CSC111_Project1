@@ -184,14 +184,8 @@ if __name__ == "__main__":
 
         location = game.get_location()
 
-        # TODO: Add new Event to game log to represent current game location
-        #  Note that the <choice> variable should be the command which led to this event
-        # YOUR CODE HERE
         game_log.add_event(Event(location.id_num, location.brief_description), choice)
 
-        # TODO: Depending on whether or not it's been visited before,
-        #  print either full description (first time visit) or brief description (every subsequent visit) of location
-        # YOUR CODE HERE
         if location.visited:
             print(location.brief_description)
         else:
@@ -278,3 +272,8 @@ if __name__ == "__main__":
 
         # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
         # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
+
+
+def run_minigame(minigame: str) -> None:
+    """runs different minigames and puzzles."""
+    pass
