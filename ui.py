@@ -1,786 +1,796 @@
 """
-CSC111 Project 1: Text Adventure Game - Professional Pygame UI (UofT Theme)
+Pygame UI for the CSC111 text adventure.
 
-Features added vs the basic UI:
-- UofT color theme (blue/white + clean neutrals)
-- Better typography, spacing, and “card” UI with shadows
-- Hover/press animations for buttons
-- Smooth fade transitions when changing locations
-- Dedicated item action buttons:
-    - Take -> opens a modal list of items at the location
-    - Drop -> opens a modal list of inventory items
-    - Inspect -> opens a modal list of inventory items
-- Optional images (auto-load if present; otherwise graceful fallback):
-    assets/
-      bg.png              (optional background)
-      logo.png            (optional UofT-ish icon/logo you provide)
-      locations/<id>.png  (optional per-location image, like locations/1.png)
+What this version adds/fixes:
+- Output panel has its own independent scroll (mouse wheel over Output).
+- Actions panel has its own independent scroll (mouse wheel over Actions list).
+  This scroll does NOT move the rest of the UI.
+- Anything that scrolls is properly clipped so it disappears behind the card,
+  like a web app sidebar (no drawing over other content).
 
-How to use:
-1) Put this in `game_pygame_ui.py`
-2) Update the import path for AdventureGame (below) to match your file name.
-3) Run: python game_pygame_ui.py
-
-NOTE:
-- This UI does NOT require you to change your JSON format.
-- It assumes your Location has: id_num, name, brief_description, long_description, visited, available_commands, items
-- It assumes your Item has: name, hint (and __str__ prints nicely)
+Controls:
+- Scroll Output: hover Output box, use mouse wheel.
+- Scroll Actions: hover Actions list area, use mouse wheel.
+- ESC closes modal / quits.
 """
 
 from __future__ import annotations
 
-import os
 import math
 import pygame
 from dataclasses import dataclass
-from typing import Optional, Callable, Sequence
+from typing import Callable, Optional, Sequence
 
-# ---- CHANGE THIS IMPORT TO YOUR PROJECT FILE NAME ----
-from adventure import AdventureGame  # e.g. if your class is in "game_manager.py"
-from event_logger import Event, EventList
+# --- CHANGE THIS IMPORT IF NEEDED ---
+from adventure import AdventureGame
+from event_logger import EventList
 
 
 # =====================================================
 # Theme (UofT-inspired)
 # =====================================================
 
-UOFT_BLUE = (0, 46, 93)        # UofT navy-ish
-UOFT_LIGHT_BLUE = (0, 88, 163) # accent
-UOFT_GOLD = (255, 205, 0)      # gold accent
-INK = (12, 14, 18)             # near-black
-PANEL = (18, 21, 28)           # dark panel
-CARD = (24, 28, 36)            # card background
-CARD_2 = (28, 33, 43)
-BORDER = (70, 80, 100)
-TEXT = (240, 244, 250)
-TEXT_DIM = (190, 198, 212)
+UOFT_BLUE = (0, 46, 93)
+UOFT_LIGHT_BLUE = (0, 88, 163)
+UOFT_GOLD = (255, 205, 0)
+
+BG_TOP = (9, 11, 16)
+BG_BOTTOM = (6, 8, 12)
+
+PANEL = (18, 22, 30)
+CARD = (24, 29, 39)
+CARD_2 = (30, 36, 48)
+
+BORDER = (80, 95, 125)
+BORDER_SOFT = (64, 76, 102)
+
+TEXT = (242, 246, 252)
+TEXT_DIM = (185, 195, 215)
 MUTED = (140, 150, 170)
-SHADOW = (0, 0, 0, 110)
 
 
 # =====================================================
-# Utility drawing helpers
+# Drawing helpers
 # =====================================================
 
-def clamp(x: float, a: float, b: float) -> float:
-    return a if x < a else b if x > b else x
-
-def lerp(a: float, b: float, t: float) -> float:
-    return a + (b - a) * t
-
-def ease_out_cubic(t: float) -> float:
-    t = clamp(t, 0.0, 1.0)
-    return 1 - (1 - t) ** 3
-
-def draw_rounded_rect(surf: pygame.Surface, rect: pygame.Rect, color: tuple[int, int, int], radius: int) -> None:
-    pygame.draw.rect(surf, color, rect, border_radius=radius)
-
-def draw_shadow(surf: pygame.Surface, rect: pygame.Rect, radius: int = 16, spread: int = 8, alpha: int = 110) -> None:
-    shadow_surf = pygame.Surface((rect.width + spread * 2, rect.height + spread * 2), pygame.SRCALPHA)
-    r = pygame.Rect(spread, spread, rect.width, rect.height)
-    pygame.draw.rect(shadow_surf, (0, 0, 0, alpha), r, border_radius=radius)
-    surf.blit(shadow_surf, (rect.x - spread, rect.y - spread))
-
-def vertical_gradient(size: tuple[int, int], top: tuple[int, int, int], bottom: tuple[int, int, int]) -> pygame.Surface:
+def vertical_gradient(size: tuple[int, int],
+                      top: tuple[int, int, int],
+                      bottom: tuple[int, int, int]) -> pygame.Surface:
+    """Return a surface filled with a vertical gradient."""
     w, h = size
-    s = pygame.Surface((w, h))
+    surf = pygame.Surface((w, h))
     for y in range(h):
         t = y / max(1, h - 1)
-        c = (
-            int(lerp(top[0], bottom[0], t)),
-            int(lerp(top[1], bottom[1], t)),
-            int(lerp(top[2], bottom[2], t)),
-        )
-        pygame.draw.line(s, c, (0, y), (w, y))
-    return s
+        r = int(top[0] + (bottom[0] - top[0]) * t)
+        g = int(top[1] + (bottom[1] - top[1]) * t)
+        b = int(top[2] + (bottom[2] - top[2]) * t)
+        pygame.draw.line(surf, (r, g, b), (0, y), (w, y))
+    return surf
 
-def blur_fallback_glow_circle(surf: pygame.Surface, center: tuple[int, int], radius: int, color: tuple[int, int, int], alpha: int) -> None:
-    # cheap glow: multiple circles
-    for i in range(6):
-        r = int(radius * (1 + i * 0.25))
-        a = int(alpha * (1 - i / 6))
-        g = pygame.Surface((r * 2, r * 2), pygame.SRCALPHA)
-        pygame.draw.circle(g, (*color, a), (r, r), r)
-        surf.blit(g, (center[0] - r, center[1] - r), special_flags=pygame.BLEND_PREMULTIPLIED)
+
+def draw_card(surface: pygame.Surface, rect: pygame.Rect,
+              fill: tuple[int, int, int] = CARD,
+              border: tuple[int, int, int] = BORDER,
+              radius: int = 14,
+              border_w: int = 2) -> None:
+    """Draw a rounded card with a border."""
+    pygame.draw.rect(surface, fill, rect, border_radius=radius)
+    pygame.draw.rect(surface, border, rect, width=border_w, border_radius=radius)
+
+
+def wrap_text(text: str, font: pygame.font.Font, width: int) -> list[str]:
+    """Wrap text into lines that fit within a given pixel width."""
+    words = text.split()
+    lines: list[str] = []
+    current = ""
+
+    for w in words:
+        test = (current + " " + w).strip()
+        if font.size(test)[0] <= width:
+            current = test
+        else:
+            if current:
+                lines.append(current)
+            current = w
+
+    if current:
+        lines.append(current)
+
+    return lines
 
 
 # =====================================================
-# UI Components
+# UI primitives
 # =====================================================
 
 @dataclass
-class UIButton:
+class Button:
+    """Clickable UI button."""
     rect: pygame.Rect
     label: str
-    on_click: Callable[[], None]
-    kind: str = "primary"  # primary/secondary/ghost
+    callback: Callable[[], None]
+    kind: str = "secondary"   # primary / secondary / ghost
     enabled: bool = True
 
-    # internal animation state
-    hover_t: float = 0.0
-    press_t: float = 0.0
+    def draw(self, surface: pygame.Surface, font: pygame.font.Font,
+             mouse_pos: tuple[int, int], y_offset: int = 0) -> None:
+        """Draw the button, shifted by y_offset (for scroll areas)."""
+        r = self.rect.move(0, y_offset)
+        hovered = self.enabled and r.collidepoint(mouse_pos)
 
-    def update(self, dt: float, mouse_pos: tuple[int, int], mouse_down: bool) -> None:
-        hovered = self.enabled and self.rect.collidepoint(mouse_pos)
-        target_hover = 1.0 if hovered else 0.0
-        self.hover_t = lerp(self.hover_t, target_hover, clamp(dt * 10, 0, 1))
-
-        target_press = 1.0 if (hovered and mouse_down) else 0.0
-        self.press_t = lerp(self.press_t, target_press, clamp(dt * 18, 0, 1))
-
-    def handle_click(self, mouse_pos: tuple[int, int]) -> None:
-        if self.enabled and self.rect.collidepoint(mouse_pos):
-            self.on_click()
-
-    def draw(self, surf: pygame.Surface, font: pygame.font.Font) -> None:
-        r = self.rect.copy()
-        # slight press "sink"
-        r.y += int(self.press_t * 2)
-
-        # style
         if self.kind == "primary":
             base = UOFT_BLUE
-            accent = UOFT_LIGHT_BLUE
-            text_color = (250, 250, 255)
-        elif self.kind == "secondary":
-            base = CARD_2
-            accent = (40, 48, 64)
-            text_color = TEXT
-        else:  # ghost
-            base = (0, 0, 0)
-            accent = (0, 0, 0)
-            text_color = TEXT
-
-        if not self.enabled:
-            base = (32, 36, 46)
-            accent = (32, 36, 46)
-            text_color = (150, 155, 165)
-
-        # hover brighten
-        t = self.hover_t
-        bg = (
-            int(lerp(base[0], accent[0], t)),
-            int(lerp(base[1], accent[1], t)),
-            int(lerp(base[2], accent[2], t)),
-        )
-
-        # shadow + border
-        draw_shadow(surf, r, radius=14, spread=6, alpha=90 if self.enabled else 40)
-        draw_rounded_rect(surf, r, bg, radius=14)
-
-        if self.kind != "ghost":
-            pygame.draw.rect(surf, (90, 105, 135), r, width=2, border_radius=14)
+            hover = UOFT_LIGHT_BLUE
+        elif self.kind == "ghost":
+            base = CARD
+            hover = CARD_2
         else:
-            # ghost hover outline
-            if self.hover_t > 0.05:
-                pygame.draw.rect(surf, (90, 105, 135), r, width=2, border_radius=14)
+            base = CARD_2
+            hover = (40, 48, 64)
 
-        # label
-        txt = font.render(self.label, True, text_color)
-        surf.blit(txt, txt.get_rect(center=r.center))
+        fill = hover if hovered else base
+        if not self.enabled:
+            fill = (35, 40, 52)
 
+        pygame.draw.rect(surface, fill, r, border_radius=12)
+        pygame.draw.rect(surface, BORDER_SOFT, r, width=2, border_radius=12)
+
+        txt_color = TEXT if self.enabled else MUTED
+        text = font.render(self.label, True, txt_color)
+        surface.blit(text, text.get_rect(center=r.center))
+
+    def handle_click(self, pos: tuple[int, int], y_offset: int = 0) -> None:
+        """Invoke callback if clicked (accounts for scroll offset)."""
+        r = self.rect.move(0, y_offset)
+        if self.enabled and r.collidepoint(pos):
+            self.callback()
+
+
+class ScrollArea:
+    """A clipped region with an independent vertical scroll offset."""
+
+    def __init__(self, rect: pygame.Rect) -> None:
+        self.rect = rect
+        self.offset = 0
+        self.content_height = rect.height
+
+    def set_rect(self, rect: pygame.Rect) -> None:
+        """Update the rectangle and clamp the offset."""
+        self.rect = rect
+        self.set_content_height(self.content_height)
+
+    def set_content_height(self, h: int) -> None:
+        """Set content height and clamp the scroll offset."""
+        self.content_height = max(h, self.rect.height)
+        self.offset = max(0, min(self.offset, self.content_height - self.rect.height))
+
+    def handle_wheel(self, mouse_pos: tuple[int, int], wheel_y: int, speed: int = 32) -> None:
+        """Scroll when the mouse is over this area."""
+        if self.rect.collidepoint(mouse_pos):
+            # wheel_y: +1 up, -1 down
+            self.offset = max(0, min(self.offset - wheel_y * speed,
+                                     self.content_height - self.rect.height))
+
+    def begin_clip(self, surface: pygame.Surface) -> pygame.Rect:
+        """Apply clipping to this area and return previous clip."""
+        prev = surface.get_clip()
+        surface.set_clip(self.rect)
+        return prev
+
+    def end_clip(self, surface: pygame.Surface, prev: pygame.Rect) -> None:
+        """Restore previous clip."""
+        surface.set_clip(prev)
+
+    def draw_scrollbar(self, surface: pygame.Surface) -> None:
+        """Draw a slim scrollbar thumb (only if scrolling is possible)."""
+        if self.content_height <= self.rect.height:
+            return
+
+        track = pygame.Rect(self.rect.right - 8, self.rect.y + 6, 4, self.rect.height - 12)
+        pygame.draw.rect(surface, (60, 70, 90), track, border_radius=3)
+
+        thumb_h = max(18, int(track.height * (self.rect.height / self.content_height)))
+        max_off = self.content_height - self.rect.height
+        t = 0 if max_off == 0 else self.offset / max_off
+        thumb_y = track.y + int((track.height - thumb_h) * t)
+
+        thumb = pygame.Rect(track.x, thumb_y, track.width, thumb_h)
+        pygame.draw.rect(surface, (120, 135, 160), thumb, border_radius=3)
+
+
+# =====================================================
+# Modal Picker
+# =====================================================
 
 class ModalPicker:
-    """A modal overlay that shows a list of options and lets user click one."""
+    """Centered modal that shows a list of options."""
+
     def __init__(self, title: str, options: Sequence[str], on_pick: Callable[[str], None]) -> None:
         self.title = title
         self.options = list(options)
         self.on_pick = on_pick
-        self.open_t = 0.0
-        self.closing = False
+        self.panel = pygame.Rect(0, 0, 0, 0)
+        self.buttons: list[Button] = []
+        self.is_open = True
 
-        self.scroll = 0
-        self.buttons: list[UIButton] = []
+    def close(self) -> None:
+        """Close the modal."""
+        self.is_open = False
 
-    def start_close(self) -> None:
-        self.closing = True
-
-    def is_done(self) -> bool:
-        return self.closing and self.open_t <= 0.01
-
-    def update(self, dt: float, mouse_pos: tuple[int, int], mouse_down: bool) -> None:
-        target = 0.0 if self.closing else 1.0
-        speed = 10 if not self.closing else 14
-        self.open_t = lerp(self.open_t, target, clamp(dt * speed, 0, 1))
-
-        for b in self.buttons:
-            b.update(dt, mouse_pos, mouse_down)
-
-    def handle_wheel(self, dy: int) -> None:
-        # dy: +/-1 steps
-        self.scroll += dy * 32
-        self.scroll = int(clamp(self.scroll, -9999, 9999))
-
-    def handle_click(self, mouse_pos: tuple[int, int]) -> None:
-        # Clicking outside panel closes
-        for b in self.buttons:
-            b.handle_click(mouse_pos)
-
-    def layout(self, screen_rect: pygame.Rect, font: pygame.font.Font, small: pygame.font.Font) -> None:
-        # Center panel
-        w = min(640, int(screen_rect.width * 0.72))
-        h = min(520, int(screen_rect.height * 0.72))
+    def layout(self, screen_rect: pygame.Rect) -> None:
+        """Compute modal geometry and option buttons."""
+        w = min(560, screen_rect.width - 160)
+        h = min(520, screen_rect.height - 160)
         x = screen_rect.centerx - w // 2
         y = screen_rect.centery - h // 2
-        self.panel_rect = pygame.Rect(x, y, w, h)
-
-        # Create option buttons (recreated each frame; simple)
-        self.buttons = []
+        self.panel = pygame.Rect(x, y, w, h)
+        self.buttons.clear()
 
         pad = 18
-        title_h = 54
-        list_rect = pygame.Rect(x + pad, y + title_h, w - pad * 2, h - title_h - 72)
+        top = y + 70
+        row_h = 40
+        gap = 10
 
-        # Option rows
-        row_h = 44
-        visible_rows = max(1, list_rect.height // (row_h + 10))
+        visible = (h - 70 - 60) // (row_h + gap)
+        visible = max(1, visible)
+        shown = self.options[:visible]
 
-        max_scroll = max(0, (len(self.options) - visible_rows) * (row_h + 10))
-        self.scroll = int(clamp(self.scroll, 0, max_scroll))
+        for i, opt in enumerate(shown):
+            r = pygame.Rect(x + pad, top + i * (row_h + gap), w - pad * 2, row_h)
 
-        start_idx = int(self.scroll // (row_h + 10))
-        y0 = list_rect.y - int(self.scroll % (row_h + 10))
+            def pick(o: str = opt) -> None:
+                self.on_pick(o)
+                self.close()
 
-        def make_pick(opt: str) -> Callable[[], None]:
-            return lambda: (self.on_pick(opt), self.start_close())
+            self.buttons.append(Button(r, opt, pick, kind="secondary"))
 
-        for i in range(start_idx, len(self.options)):
-            yy = y0 + (i - start_idx) * (row_h + 10)
-            if yy > list_rect.bottom:
-                break
-            r = pygame.Rect(list_rect.x, yy, list_rect.width, row_h)
-            self.buttons.append(UIButton(r, self.options[i], make_pick(self.options[i]), kind="secondary"))
+        cancel_rect = pygame.Rect(x + pad, y + h - 44, 120, 32)
+        self.buttons.append(Button(cancel_rect, "Cancel", self.close, kind="ghost"))
 
-        # Cancel button
-        cancel_rect = pygame.Rect(x + pad, y + h - 54, 120, 36)
-        self.buttons.append(UIButton(cancel_rect, "Cancel", self.start_close, kind="ghost"))
+    def draw(self, surface: pygame.Surface, title_font: pygame.font.Font,
+             btn_font: pygame.font.Font, mouse_pos: tuple[int, int]) -> None:
+        """Render the modal with a dark overlay."""
+        overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 160))
+        surface.blit(overlay, (0, 0))
 
-    def draw(self, surf: pygame.Surface, font: pygame.font.Font, small: pygame.font.Font) -> None:
-        # overlay fade
-        t = ease_out_cubic(self.open_t)
-        overlay = pygame.Surface(surf.get_size(), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, int(140 * t)))
-        surf.blit(overlay, (0, 0))
+        draw_card(surface, self.panel, CARD, radius=16)
+        title = title_font.render(self.title, True, TEXT)
+        surface.blit(title, (self.panel.x + 18, self.panel.y + 18))
 
-        # panel pop animation
-        pr = self.panel_rect.copy()
-        scale = lerp(0.96, 1.0, t)
-        pr.width = int(pr.width * scale)
-        pr.height = int(pr.height * scale)
-        pr.center = self.panel_rect.center
-
-        draw_shadow(surf, pr, radius=18, spread=10, alpha=120)
-        draw_rounded_rect(surf, pr, CARD, radius=18)
-        pygame.draw.rect(surf, (90, 105, 135), pr, width=2, border_radius=18)
-
-        # Title
-        title = font.render(self.title, True, TEXT)
-        surf.blit(title, (pr.x + 18, pr.y + 14))
-
-        # Buttons
-        clip = surf.get_clip()
-        inner = pygame.Rect(pr.x + 16, pr.y + 58, pr.width - 32, pr.height - 58 - 64)
-        surf.set_clip(inner)
         for b in self.buttons:
-            if b.label == "Cancel":
-                continue
-            b.draw(surf, small)
-        surf.set_clip(clip)
+            b.draw(surface, btn_font, mouse_pos)
 
-        # Cancel
+    def handle_click(self, pos: tuple[int, int]) -> None:
+        """Handle clicks on modal buttons."""
         for b in self.buttons:
-            if b.label == "Cancel":
-                b.draw(surf, small)
+            b.handle_click(pos)
 
 
 # =====================================================
-# The Game UI
+# Minimap
 # =====================================================
 
-class ProfessionalGameUI:
-    def __init__(self, game: AdventureGame, game_log: EventList) -> None:
+class MiniMap:
+    """Graph minimap built from available_commands."""
+
+    def __init__(self, game: AdventureGame) -> None:
         self.game = game
-        self.log = game_log
+        self.positions: dict[int, pygame.Vector2] = {}
+        self.edges: set[tuple[int, int]] = set()
+        self._build_graph()
+        self._force_layout(iters=220)
 
-        # Fix common bug: class attributes used as instance state
-        if not hasattr(self.game, "inventory") or self.game.inventory is AdventureGame.inventory:
-            self.game.inventory = []
-        if not hasattr(self.game, "score") or self.game.score is AdventureGame.score:
-            self.game.score = 0
+    def _build_graph(self) -> None:
+        """Extract nodes and undirected edges."""
+        loc_ids = sorted(self.game._locations.keys())
+        n = max(1, len(loc_ids))
 
-        self.menu = ["Look", "Inventory", "Score", "Log", "Quit"]
-        self.messages: list[str] = []
+        for i, lid in enumerate(loc_ids):
+            ang = 2 * math.pi * i / n
+            self.positions[lid] = pygame.Vector2(math.cos(ang), math.sin(ang))
+
+        for lid, loc in self.game._locations.items():
+            for _, nxt in loc.available_commands.items():
+                if nxt in self.game._locations:
+                    a, b = (lid, nxt) if lid < nxt else (nxt, lid)
+                    self.edges.add((a, b))
+
+    def _force_layout(self, iters: int = 220) -> None:
+        """Run a small force layout then normalize to [0,1]."""
+        ids = list(self.positions.keys())
+        if len(ids) <= 1:
+            return
+
+        k = 1.0 / math.sqrt(len(ids))
+        temp = 0.12
+
+        for _ in range(iters):
+            disp = {i: pygame.Vector2(0, 0) for i in ids}
+
+            for ai in range(len(ids)):
+                for bi in range(ai + 1, len(ids)):
+                    a = ids[ai]
+                    b = ids[bi]
+                    delta = self.positions[a] - self.positions[b]
+                    dist = max(0.06, delta.length())
+                    force = (k * k) / dist
+                    vec = delta.normalize() * force
+                    disp[a] += vec
+                    disp[b] -= vec
+
+            for u, v in self.edges:
+                delta = self.positions[u] - self.positions[v]
+                dist = max(0.06, delta.length())
+                force = (dist * dist) / k
+                vec = delta.normalize() * force
+                disp[u] -= vec
+                disp[v] += vec
+
+            for i in ids:
+                d = disp[i]
+                if d.length() > 0:
+                    self.positions[i] += d.normalize() * min(d.length(), temp)
+
+        xs = [self.positions[i].x for i in ids]
+        ys = [self.positions[i].y for i in ids]
+        minx, maxx = min(xs), max(xs)
+        miny, maxy = min(ys), max(ys)
+        dx = max(0.001, maxx - minx)
+        dy = max(0.001, maxy - miny)
+
+        for i in ids:
+            self.positions[i] = pygame.Vector2(
+                (self.positions[i].x - minx) / dx,
+                (self.positions[i].y - miny) / dy
+            )
+
+    def draw(self, surface: pygame.Surface, rect: pygame.Rect, current_id: int) -> None:
+        """Draw the minimap."""
+        draw_card(surface, rect, CARD, radius=14)
+
+        for u, v in self.edges:
+            if u not in self.positions or v not in self.positions:
+                continue
+            p1 = (rect.x + int(self.positions[u].x * rect.width),
+                  rect.y + int(self.positions[u].y * rect.height))
+            p2 = (rect.x + int(self.positions[v].x * rect.width),
+                  rect.y + int(self.positions[v].y * rect.height))
+            pygame.draw.line(surface, (120, 135, 160), p1, p2, 2)
+
+        for lid, pos in self.positions.items():
+            px = rect.x + int(pos.x * rect.width)
+            py = rect.y + int(pos.y * rect.height)
+
+            if lid == current_id:
+                pygame.draw.circle(surface, UOFT_GOLD, (px, py), 8)
+                pygame.draw.circle(surface, (0, 0, 0), (px, py), 8, 2)
+            else:
+                pygame.draw.circle(surface, UOFT_BLUE, (px, py), 5)
+                pygame.draw.circle(surface, (0, 0, 0), (px, py), 5, 2)
+
+
+# =====================================================
+# Main UI
+# =====================================================
+
+class GameUI:
+    """Main Pygame UI loop and rendering."""
+
+    def __init__(self, game: AdventureGame, log: EventList) -> None:
+        self.game = game
+        self.log = log
+
+        self.game.inventory = list(getattr(self.game, "inventory", []))
+        self.game.score = int(getattr(self.game, "score", 0))
+
         self.modal: Optional[ModalPicker] = None
-        self.clear_output_each_choice = True
-        self.max_history_lines = 12
+        self.minimap = MiniMap(game)
 
-        self.transition_t = 0.0
-        self.transition_active = False
-        self.prev_location_id: Optional[int] = None
+        self.output_lines: list[str] = []
+        self.output_scroll: Optional[ScrollArea] = None
+        self.actions_scroll: Optional[ScrollArea] = None
 
-        # Images (optional)
-        self.assets_dir = os.path.join(os.path.dirname(__file__), "assets")
-        self.bg_img = self._load_image(os.path.join(self.assets_dir, "bg.png"))
-        self.logo_img = self._load_image(os.path.join(self.assets_dir, "logo.png"))
-        self.location_img_cache: dict[int, pygame.Surface] = {}
+    # ---------- Output helpers ----------
 
-    def clear_output(self) -> None:
-        self.messages.clear()
+    def begin_turn(self, label: str) -> None:
+        """Clear output and begin a new action."""
+        self.output_lines = [f"You chose: {label}"]
 
-    def _load_image(self, path: str) -> Optional[pygame.Surface]:
-        try:
-            if os.path.exists(path):
-                img = pygame.image.load(path).convert_alpha()
-                return img
-        except Exception:
-            return None
-        return None
+        # Reset output scroll so new content starts at the top.
+        if self.output_scroll is not None:
+            self.output_scroll.offset = 0
 
-    def _get_location_image(self, loc_id: int) -> Optional[pygame.Surface]:
-        if loc_id in self.location_img_cache:
-            return self.location_img_cache[loc_id]
-        path = os.path.join(self.assets_dir, "locations", f"{loc_id}.png")
-        img = self._load_image(path)
-        if img is not None:
-            self.location_img_cache[loc_id] = img
-        return img
+    def out(self, text: str) -> None:
+        """Append text to the current turn output."""
+        for line in text.split("\n"):
+            s = line.strip()
+            if s:
+                self.output_lines.append(s)
 
-    def push(self, s: str) -> None:
-        for line in s.split("\n"):
-            if line.strip():
-                self.messages.append(line.strip())
-        self.messages = self.messages[-12:]
-
-    def current_desc(self) -> str:
+    def location_description(self) -> str:
+        """Return the correct location description and update visited."""
         loc = self.game.get_location()
         if getattr(loc, "visited", False):
             return loc.brief_description
         loc.visited = True
         return loc.long_description
 
-    def start_transition(self) -> None:
-        self.transition_active = True
-        self.transition_t = 0.0
+    def _compute_output_content_height(self, body_font: pygame.font.Font, inner_width: int) -> int:
+        """Compute the pixel height of output content (wrapped)."""
+        line_h = body_font.get_height() + 4
+        wrapped: list[str] = []
+        for raw in self.output_lines:
+            wrapped.extend(wrap_text(raw, body_font, inner_width))
+        return max(1, len(wrapped) * line_h)
 
-    def update_transition(self, dt: float) -> None:
-        if not self.transition_active:
-            return
-        self.transition_t += dt * 3.0
-        if self.transition_t >= 1.0:
-            self.transition_t = 1.0
-            self.transition_active = False
+    def draw_output(self, surface: pygame.Surface, rect: pygame.Rect,
+                    label_font: pygame.font.Font, body_font: pygame.font.Font,
+                    mouse_pos: tuple[int, int]) -> None:
+        """Draw a scrollable output card with proper clipping."""
+        draw_card(surface, rect, CARD, radius=16)
+        label = label_font.render("Output", True, TEXT_DIM)
+        surface.blit(label, (rect.x + 18, rect.y + 10))
 
-    def go_to_location(self, loc_id: int) -> None:
-        self.prev_location_id = self.game.current_location_id
-        self.game.current_location_id = loc_id
-        self.start_transition()
-        self.push(self.current_desc())
-        new_loc = self.game.get_location()
-        if getattr(new_loc, "items", None):
-            if len(new_loc.items) > 0:
-                self.push("Items here: " + ", ".join(new_loc.items))
+        header_h = 34
+        inner = pygame.Rect(rect.x + 18, rect.y + header_h,
+                            rect.width - 36, rect.height - header_h - 16)
 
-    def begin_turn(self, choice_label: str) -> None:
-        if self.clear_output_each_choice:
-            self.clear_output()
-        self.push(f"▶ You chose: {choice_label}")
+        if self.output_scroll is None:
+            self.output_scroll = ScrollArea(inner)
+        else:
+            self.output_scroll.set_rect(inner)
 
-    # ---------------- Commands ----------------
+        content_h = self._compute_output_content_height(body_font, inner.width - 10)
+        self.output_scroll.set_content_height(content_h)
 
-    def do_menu(self, label: str) -> None:
-        self.begin_turn(label)  # <-- NEW (clears output each choice)
-        label_lower = label.lower()
-        loc = self.game.get_location()
-        self.log.add_event(Event(loc.id_num, loc.brief_description), label_lower)
+        # Draw clipped scrolling text
+        prev = self.output_scroll.begin_clip(surface)
 
-        if label_lower == "quit":
-            self.game.ongoing = False
-            self.push("Quitting...")
-            return
+        y = inner.y - self.output_scroll.offset
+        line_h = body_font.get_height() + 4
 
-        if label_lower == "look":
-            self.push(loc.long_description)
-            if len(loc.items) > 0:
-                self.push("Items here: " + ", ".join(loc.items))
-            else:
-                self.push("No items here.")
-            return
+        for raw in self.output_lines:
+            for line in wrap_text(raw, body_font, inner.width - 10):
+                if y + body_font.get_height() >= inner.y - line_h and y <= inner.bottom + line_h:
+                    surface.blit(body_font.render(line, True, TEXT), (inner.x, y))
+                y += line_h
 
-        if label_lower == "inventory":
-            if self.game.inventory:
-                inv = ", ".join([it.name for it in self.game.inventory])
-                self.push("Inventory: " + inv)
-            else:
-                self.push("Inventory is empty.")
-            return
+        self.output_scroll.end_clip(surface, prev)
+        self.output_scroll.draw_scrollbar(surface)
 
-        if label_lower == "score":
-            self.push(f"Score: {self.game.score}")
-            return
-
-        if label_lower == "log":
-            # Your EventList probably prints to console; here we show a friendly message.
-            self.push("Opened log. (If EventList only prints, check console output.)")
-            try:
-                self.log.display_events()
-            except Exception:
-                pass
-            return
+    # ---------- Actions ----------
 
     def open_take_modal(self) -> None:
-        # NOTE: we don't clear output on opening the modal; only when an item is picked.
+        """Show a modal list of items in the current location."""
         loc = self.game.get_location()
-        options = list(loc.items) if loc.items else []
+        options = list(loc.items)
         if not options:
             self.begin_turn("Take")
-            self.push("Nothing to take here.")
+            self.out("There is nothing to take here.")
             return
 
         def pick(item_name: str) -> None:
-            self.begin_turn(f"Take {item_name}")  # <-- NEW (clears)
+            self.begin_turn(f"Take {item_name}")
             if self.game.pick_up(item_name):
-                self.push(f"Picked up: {item_name}")
+                self.out(f"Picked up: {item_name}")
             else:
-                self.push(f"Couldn't take: {item_name}")
+                self.out(f"Could not take: {item_name}")
 
         self.modal = ModalPicker("Take which item?", options, pick)
 
     def open_drop_modal(self) -> None:
+        """Show a modal list of items in inventory to drop."""
         options = [it.name for it in self.game.inventory]
         if not options:
             self.begin_turn("Drop")
-            self.push("You have nothing to drop.")
+            self.out("Your inventory is empty.")
             return
 
         def pick(item_name: str) -> None:
-            self.begin_turn(f"Drop {item_name}")  # <-- NEW (clears)
+            self.begin_turn(f"Drop {item_name}")
             if self.game.drop(item_name):
-                self.push(f"Dropped: {item_name}")
+                self.out(f"Dropped: {item_name}")
                 try:
                     self.game.check_quest(item_name)
                 except Exception:
                     pass
             else:
-                self.push(f"Couldn't drop: {item_name}")
+                self.out(f"Could not drop: {item_name}")
 
         self.modal = ModalPicker("Drop which item?", options, pick)
 
     def open_inspect_modal(self) -> None:
+        """Show a modal list of items in inventory to inspect."""
         options = [it.name for it in self.game.inventory]
         if not options:
             self.begin_turn("Inspect")
-            self.push("You have nothing to inspect.")
+            self.out("Your inventory is empty.")
             return
 
         def pick(item_name: str) -> None:
-            self.begin_turn(f"Inspect {item_name}")  # <-- NEW (clears)
+            self.begin_turn(f"Inspect {item_name}")
             try:
                 it = self.game.get_item(item_name)
-                self.push(f"{it.name}: {it.hint}")
+                self.out(it.hint)
             except Exception:
-                self.push(f"Can't inspect: {item_name}")
+                self.out("That item could not be inspected.")
 
         self.modal = ModalPicker("Inspect which item?", options, pick)
 
-    def do_location_action(self, action: str) -> None:
-        self.begin_turn(action)  # <-- NEW (clears output each choice)
+    def do_look(self) -> None:
+        """Show long description and items."""
+        self.begin_turn("Look")
         loc = self.game.get_location()
-        if action not in loc.available_commands:
-            self.push("Invalid action.")
+        self.out(loc.long_description)
+        self.out("Items here: " + (", ".join(loc.items) if loc.items else "(none)"))
+
+    def do_inventory(self) -> None:
+        """Show inventory contents."""
+        self.begin_turn("Inventory")
+        if self.game.inventory:
+            self.out("You are carrying:")
+            for it in self.game.inventory:
+                self.out(f"- {it.name}")
+        else:
+            self.out("Your inventory is empty.")
+
+    def do_score(self) -> None:
+        """Show score."""
+        self.begin_turn("Score")
+        self.out(f"Score: {self.game.score}")
+
+    def do_log(self) -> None:
+        """Print log to console and note it in UI."""
+        self.begin_turn("Log")
+        self.out("Printed log to console.")
+        try:
+            self.log.display_events()
+        except Exception:
+            self.out("Log display is not available.")
+
+    def do_quit(self) -> None:
+        """Quit the game."""
+        self.begin_turn("Quit")
+        self.out("Quitting...")
+        self.game.ongoing = False
+
+    def do_move(self, command_key: str) -> None:
+        """Perform a location command (moves location)."""
+        loc = self.game.get_location()
+        if command_key not in loc.available_commands:
+            self.begin_turn(command_key)
+            self.out("That action isn't available here.")
             return
-        nxt = loc.available_commands[action]
-        self.go_to_location(nxt)
 
-    # ---------------- Layout ----------------
+        self.begin_turn(command_key)
+        self.game.current_location_id = loc.available_commands[command_key]
 
-    def build_buttons(self, screen_rect: pygame.Rect) -> tuple[list[UIButton], list[UIButton]]:
-        w, h = screen_rect.size
+        new_loc = self.game.get_location()
+        self.out(self.location_description())
+        if new_loc.items:
+            self.out("Items here: " + ", ".join(new_loc.items))
 
-        # Right panel
-        panel_w = 380
-        x = w - panel_w - 20
-        y = 20
-        right = pygame.Rect(x, y, panel_w, h - 40)
+    # ---------- Run loop ----------
 
-        # Top quick actions (Take/Drop/Inspect)
-        qa_y = right.y + 72
-        qa_h = 44
-        qa_gap = 10
-        qa_w = right.width - 36
-        qa_x = right.x + 18
+    def run(self) -> None:
+        """Run the UI main loop."""
+        pygame.init()
+        screen = pygame.display.set_mode((1280, 720))
+        pygame.display.set_caption("CSC111 Adventure")
+        clock = pygame.time.Clock()
 
-        quick: list[UIButton] = []
-        quick.append(UIButton(pygame.Rect(qa_x, qa_y + 0 * (qa_h + qa_gap), qa_w, qa_h),
-                              "Take", self.open_take_modal, kind="primary"))
-        quick.append(UIButton(pygame.Rect(qa_x, qa_y + 1 * (qa_h + qa_gap), qa_w, qa_h),
-                              "Drop", self.open_drop_modal, kind="secondary"))
-        quick.append(UIButton(pygame.Rect(qa_x, qa_y + 2 * (qa_h + qa_gap), qa_w, qa_h),
-                              "Inspect", self.open_inspect_modal, kind="secondary"))
+        title_font = pygame.font.SysFont("arial", 26, bold=True)
+        label_font = pygame.font.SysFont("arial", 16, bold=True)
+        body_font = pygame.font.SysFont("arial", 18)
+        cmd_font = pygame.font.SysFont("arial", 16)
 
-        # Menu buttons
-        menu_y = qa_y + 3 * (qa_h + qa_gap) + 18
-        menu_h = 40
-        menu_gap = 10
+        self.begin_turn("Start")
+        self.out(self.location_description())
 
-        menu_btns: list[UIButton] = []
-        for i, lab in enumerate(self.menu):
-            r = pygame.Rect(qa_x, menu_y + i * (menu_h + menu_gap), qa_w, menu_h)
-            kind = "ghost" if lab in ("Log", "Inventory") else "secondary"
-            if lab == "Quit":
-                kind = "ghost"
-            menu_btns.append(UIButton(r, lab, lambda l=lab: self.do_menu(l), kind=kind))
+        running = True
+        while running and self.game.ongoing:
+            clock.tick(60)
+            mouse_pos = pygame.mouse.get_pos()
 
-        # Location commands list below menu
-        loc = self.game.get_location()
-        cmds = list(loc.available_commands.keys())
+            pad = 20
+            gap = 16
 
-        cmd_start = menu_btns[-1].rect.bottom + 18
-        cmd_h = 38
-        cmd_gap = 9
-        for i, cmd in enumerate(cmds[:12]):  # clip to avoid overflow
-            r = pygame.Rect(qa_x, cmd_start + i * (cmd_h + cmd_gap), qa_w, cmd_h)
-            menu_btns.append(UIButton(r, cmd.title(), lambda c=cmd: self.do_location_action(c), kind="secondary"))
+            left_w = 820
+            right_w = screen.get_width() - (pad * 2) - left_w - gap
 
-        return quick, menu_btns
+            left_panel = pygame.Rect(pad, pad, left_w, screen.get_height() - pad * 2)
+            right_panel = pygame.Rect(left_panel.right + gap, pad, right_w, left_panel.height)
 
-    # ---------------- Rendering ----------------
+            # LEFT cards
+            header_h = 78
+            desc_h = 210
+            items_h = 64
 
-    def draw_background(self, screen: pygame.Surface) -> None:
-        w, h = screen.get_size()
-        if self.bg_img is not None:
-            img = pygame.transform.smoothscale(self.bg_img, (w, h))
-            screen.blit(img, (0, 0))
-            # add a dark overlay for readability
-            overlay = pygame.Surface((w, h), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 140))
-            screen.blit(overlay, (0, 0))
-        else:
-            # nice gradient
-            g = vertical_gradient((w, h), (10, 12, 18), (6, 8, 12))
-            screen.blit(g, (0, 0))
-            # subtle glow accent
-            blur_fallback_glow_circle(screen, (int(w * 0.25), int(h * 0.25)), 120, UOFT_LIGHT_BLUE, 80)
-            blur_fallback_glow_circle(screen, (int(w * 0.70), int(h * 0.65)), 180, (40, 60, 110), 60)
+            header_rect = pygame.Rect(left_panel.x, left_panel.y, left_panel.width, header_h)
+            desc_rect = pygame.Rect(left_panel.x, header_rect.bottom + gap, left_panel.width, desc_h)
+            items_rect = pygame.Rect(left_panel.x, desc_rect.bottom + gap, left_panel.width, items_h)
 
-    def draw_left_panel(self, screen: pygame.Surface, font: pygame.font.Font,
-                        small: pygame.font.Font, tiny: pygame.font.Font) -> None:
-        w, h = screen.get_size()
-        right_panel_w = 420
-        left = pygame.Rect(20, 20, w - right_panel_w - 60, h - 40)
+            output_top = items_rect.bottom + gap + 6
+            out_rect = pygame.Rect(left_panel.x, output_top, left_panel.width, left_panel.bottom - output_top)
 
-        draw_shadow(screen, left, radius=18, spread=10, alpha=120)
-        draw_rounded_rect(screen, left, PANEL, radius=18)
-        pygame.draw.rect(screen, (60, 70, 95), left, width=2, border_radius=18)
+            # RIGHT cards
+            map_h = 260
+            map_rect = pygame.Rect(right_panel.x, right_panel.y, right_panel.width, map_h)
+            actions_card = pygame.Rect(right_panel.x, map_rect.bottom + gap, right_panel.width,
+                                       right_panel.height - map_h - gap)
 
-        loc = self.game.get_location()
+            # Actions card inner scroll area (this is what scrolls independently)
+            actions_header_h = 36
+            actions_inner = pygame.Rect(actions_card.x + 16, actions_card.y + actions_header_h,
+                                        actions_card.width - 32, actions_card.height - actions_header_h - 16)
 
-        # Header bar
-        header = pygame.Rect(left.x + 16, left.y + 14, left.width - 32, 68)
-        draw_rounded_rect(screen, header, CARD, radius=16)
-        pygame.draw.rect(screen, (90, 105, 135), header, width=2, border_radius=16)
-
-        # Optional logo
-        if self.logo_img is not None:
-            logo = pygame.transform.smoothscale(self.logo_img, (42, 42))
-            screen.blit(logo, (header.x + 12, header.y + 13))
-            title_x = header.x + 12 + 42 + 12
-        else:
-            # small gold dot accent
-            pygame.draw.circle(screen, UOFT_GOLD, (header.x + 28, header.y + 34), 8)
-            title_x = header.x + 48
-
-        title = font.render(loc.name, True, TEXT)
-        screen.blit(title, (title_x, header.y + 10))
-
-        subtitle = tiny.render(f"Location ID: {loc.id_num}    •    Score: {self.game.score}", True, TEXT_DIM)
-        screen.blit(subtitle, (title_x, header.y + 40))
-
-        # Location image “card”
-        img_card = pygame.Rect(left.x + 16, header.bottom + 14, min(360, left.width - 32), 200)
-        draw_rounded_rect(screen, img_card, CARD, radius=16)
-        pygame.draw.rect(screen, (90, 105, 135), img_card, width=2, border_radius=16)
-
-        img = self._get_location_image(loc.id_num)
-        if img is not None:
-            # cover-fit
-            iw, ih = img.get_size()
-            scale = max(img_card.width / iw, img_card.height / ih)
-            new_size = (int(iw * scale), int(ih * scale))
-            scaled = pygame.transform.smoothscale(img, new_size)
-            crop = scaled.subsurface(pygame.Rect(
-                (scaled.get_width() - img_card.width) // 2,
-                (scaled.get_height() - img_card.height) // 2,
-                img_card.width,
-                img_card.height
-            ))
-            # rounded clip
-            mask = pygame.Surface(img_card.size, pygame.SRCALPHA)
-            pygame.draw.rect(mask, (255, 255, 255, 255), mask.get_rect(), border_radius=16)
-            crop2 = crop.copy()
-            crop2.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-            screen.blit(crop2, (img_card.x, img_card.y))
-        else:
-            # placeholder art
-            ph = tiny.render("Add assets/locations/<id>.png to show an image here", True, MUTED)
-            screen.blit(ph, (img_card.x + 14, img_card.y + 14))
-            # diagonal stripes
-            stripe = pygame.Surface(img_card.size, pygame.SRCALPHA)
-            for k in range(-img_card.height, img_card.width, 18):
-                pygame.draw.line(stripe, (255, 255, 255, 18), (k, 0), (k + img_card.height, img_card.height), 6)
-            screen.blit(stripe, img_card.topleft)
-
-        # Description & items column next to image if wide
-        text_area = pygame.Rect(img_card.right + 14, img_card.y, left.right - (img_card.right + 14) - 16, img_card.height)
-        if text_area.width < 240:
-            # stack below if too narrow
-            text_area = pygame.Rect(left.x + 16, img_card.bottom + 14, left.width - 32, 170)
-
-        draw_rounded_rect(screen, text_area, CARD, radius=16)
-        pygame.draw.rect(screen, (90, 105, 135), text_area, width=2, border_radius=16)
-
-        desc = loc.brief_description if getattr(loc, "visited", False) else loc.long_description
-        self._draw_wrapped(screen, desc, small, TEXT, pygame.Rect(text_area.x + 14, text_area.y + 12,
-                                                                  text_area.width - 28, text_area.height - 24))
-
-        # Items pill row
-        items_card = pygame.Rect(left.x + 16, max(img_card.bottom, text_area.bottom) + 14, left.width - 32, 58)
-        draw_rounded_rect(screen, items_card, CARD, radius=16)
-        pygame.draw.rect(screen, (90, 105, 135), items_card, width=2, border_radius=16)
-
-        items_label = tiny.render("Items here", True, TEXT_DIM)
-        screen.blit(items_label, (items_card.x + 14, items_card.y + 10))
-
-        items_str = ", ".join(loc.items) if loc.items else "(none)"
-        items_val = small.render(items_str, True, TEXT)
-        screen.blit(items_val, (items_card.x + 14, items_card.y + 28))
-
-        # Output card
-        out_card = pygame.Rect(left.x + 16, items_card.bottom + 14, left.width - 32, left.bottom - (items_card.bottom + 14) - 16)
-        draw_rounded_rect(screen, out_card, CARD, radius=16)
-        pygame.draw.rect(screen, (90, 105, 135), out_card, width=2, border_radius=16)
-
-        out_title = tiny.render("Output", True, TEXT_DIM)
-        screen.blit(out_title, (out_card.x + 14, out_card.y + 10))
-
-        # messages
-        y = out_card.y + 32
-        for line in self.messages[-11:]:
-            t = small.render(line, True, TEXT)
-            screen.blit(t, (out_card.x + 14, y))
-            y += t.get_height() + 4
-
-    def _draw_wrapped(self, surf: pygame.Surface, text: str, font: pygame.font.Font,
-                      color: tuple[int, int, int], rect: pygame.Rect) -> None:
-        words = text.split()
-        lines: list[str] = []
-        cur = ""
-        for w in words:
-            test = (cur + " " + w).strip()
-            if font.size(test)[0] <= rect.width:
-                cur = test
+            if self.actions_scroll is None:
+                self.actions_scroll = ScrollArea(actions_inner)
             else:
-                if cur:
-                    lines.append(cur)
-                cur = w
-        if cur:
-            lines.append(cur)
+                self.actions_scroll.set_rect(actions_inner)
 
-        y = rect.y
-        for line in lines:
-            if y + font.get_height() > rect.bottom:
-                break
-            surf.blit(font.render(line, True, color), (rect.x, y))
-            y += font.get_height() + 2
+            loc = self.game.get_location()
+            cmd_keys = list(loc.available_commands.keys())
 
-    def draw_right_panel(self, screen: pygame.Surface, font: pygame.font.Font,
-                         small: pygame.font.Font, tiny: pygame.font.Font,
-                         quick: list[UIButton], buttons: list[UIButton]) -> None:
-        w, h = screen.get_size()
-        right = pygame.Rect(w - 380 - 20, 20, 380, h - 40)
+            # Build ALL action buttons in one scrollable "content space"
+            # (So you can always scroll within Actions without anything overflowing.)
+            btn_h = 34
+            btn_gap = 9
+            y = actions_inner.y  # content y starts at the scroll area's top in content-coordinates
+            x = actions_inner.x
+            w = actions_inner.width - 12  # leave room for scrollbar
 
-        draw_shadow(screen, right, radius=18, spread=10, alpha=120)
-        draw_rounded_rect(screen, right, PANEL, radius=18)
-        pygame.draw.rect(screen, (60, 70, 95), right, width=2, border_radius=18)
+            buttons: list[Button] = []
 
-        header = font.render("Actions", True, TEXT)
-        screen.blit(header, (right.x + 18, right.y + 16))
-        sub = tiny.render("Movement + inventory tools", True, TEXT_DIM)
-        screen.blit(sub, (right.x + 18, right.y + 46))
+            # Section: Items
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Take", self.open_take_modal, kind="primary"))
+            y += btn_h + btn_gap
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Drop", self.open_drop_modal, kind="secondary"))
+            y += btn_h + btn_gap
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Inspect", self.open_inspect_modal, kind="secondary"))
+            y += btn_h + 14
 
-        # quick action card
-        qa_card = pygame.Rect(right.x + 18, right.y + 64, right.width - 36, 200)
-        draw_rounded_rect(screen, qa_card, CARD, radius=16)
-        pygame.draw.rect(screen, (90, 105, 135), qa_card, width=2, border_radius=16)
-        lab = tiny.render("Items", True, TEXT_DIM)
-        screen.blit(lab, (qa_card.x + 14, qa_card.y + 12))
+            # Section: Menu
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Look", self.do_look, kind="ghost"))
+            y += btn_h + btn_gap
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Inventory", self.do_inventory, kind="ghost"))
+            y += btn_h + btn_gap
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Score", self.do_score, kind="ghost"))
+            y += btn_h + btn_gap
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Log", self.do_log, kind="ghost"))
+            y += btn_h + btn_gap
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Quit", self.do_quit, kind="ghost"))
+            y += btn_h + 16
 
-        # Draw quick buttons
-        for b in quick:
-            b.draw(screen, small)
+            # Section: Move/Interact (two-column grid inside the scroll content)
+            col_gap = 10
+            col_w = (w - col_gap) // 2
+            row_h = 30
+            row_gap = 8
 
-        # divider
-        pygame.draw.line(screen, (70, 80, 100), (right.x + 22, qa_card.bottom + 16), (right.right - 22, qa_card.bottom + 16), 2)
+            start_y = y
+            for i, cmd in enumerate(cmd_keys):
+                col = i % 2
+                row = i // 2
+                bx = x + col * (col_w + col_gap)
+                by = start_y + row * (row_h + row_gap)
+                buttons.append(Button(pygame.Rect(bx, by, col_w, row_h),
+                                      cmd.title(),
+                                      lambda c=cmd: self.do_move(c),
+                                      kind="secondary"))
+            rows = (len(cmd_keys) + 1) // 2
+            y = start_y + (rows * (row_h + row_gap) - (row_gap if rows > 0 else 0))
 
-        # Buttons already laid out in build_buttons
-        for b in buttons:
-            b.draw(screen, small)
+            # Update actions scroll content height
+            content_h = max(1, (y - actions_inner.y) + 8)
+            self.actions_scroll.set_content_height(content_h)
 
-        # subtle gold accent at bottom
-        pygame.draw.rect(screen, UOFT_GOLD, pygame.Rect(right.x + 18, right.bottom - 10, 90, 4), border_radius=2)
+            # ---------------- Events ----------------
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
 
-    def draw_transition(self, screen: pygame.Surface) -> None:
-        if not self.transition_active and self.transition_t <= 0.0:
-            return
-        t = ease_out_cubic(self.transition_t)
-        # fade overlay
-        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, int(120 * (1 - t))))
-        screen.blit(overlay, (0, 0))
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        if self.modal is not None:
+                            self.modal.close()
+                        else:
+                            self.do_quit()
 
-    # ---------------- Main loop integration ----------------
+                elif event.type == pygame.MOUSEWHEEL:
+                    if self.modal is None:
+                        # Independent scroll: Output and Actions each handle wheel only if hovered.
+                        if self.output_scroll is not None:
+                            self.output_scroll.handle_wheel(mouse_pos, event.y, speed=36)
+                        if self.actions_scroll is not None:
+                            self.actions_scroll.handle_wheel(mouse_pos, event.y, speed=36)
 
-    def update(self, dt: float, mouse_pos: tuple[int, int], mouse_down: bool,
-               quick: list[UIButton], buttons: list[UIButton]) -> None:
-        self.update_transition(dt)
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.modal is not None:
+                        self.modal.handle_click(event.pos)
+                    else:
+                        # Click inside scrollable actions: shift by -offset
+                        if self.actions_scroll is not None:
+                            y_off = -self.actions_scroll.offset
+                            for b in buttons:
+                                b.handle_click(event.pos, y_offset=y_off)
 
-        # modal updates
-        if self.modal is not None:
-            self.modal.update(dt, mouse_pos, mouse_down)
-            if self.modal.is_done():
+            if self.modal is not None and not self.modal.is_open:
                 self.modal = None
-            return
 
-        for b in quick:
-            b.update(dt, mouse_pos, mouse_down)
-        for b in buttons:
-            b.update(dt, mouse_pos, mouse_down)
+            # ---------------- Draw ----------------
+            screen.blit(vertical_gradient(screen.get_size(), BG_TOP, BG_BOTTOM), (0, 0))
 
-    def click(self, mouse_pos: tuple[int, int], quick: list[UIButton], buttons: list[UIButton]) -> None:
-        if self.modal is not None:
-            self.modal.handle_click(mouse_pos)
-            return
+            draw_card(screen, left_panel, PANEL, radius=16)
+            draw_card(screen, right_panel, PANEL, radius=16)
 
-        for b in quick:
-            b.handle_click(mouse_pos)
-        for b in buttons:
-            b.handle_click(mouse_pos)
+            # Header
+            draw_card(screen, header_rect, CARD, radius=16)
+            header_title = title_font.render(loc.name, True, TEXT)
+            header_sub = body_font.render(f"Location ID: {loc.id_num}   •   Score: {self.game.score}", True, TEXT_DIM)
+            screen.blit(header_title, (header_rect.x + 18, header_rect.y + 14))
+            screen.blit(header_sub, (header_rect.x + 18, header_rect.y + 44))
 
-    def wheel(self, dy: int) -> None:
-        if self.modal is not None:
-            self.modal.handle_wheel(-dy)  # pygame dy: up is +1 typically depending on event
+            # Description
+            draw_card(screen, desc_rect, CARD, radius=16)
+            screen.blit(label_font.render("Description", True, TEXT_DIM), (desc_rect.x + 18, desc_rect.y + 10))
 
-    def draw(self, screen: pygame.Surface, font: pygame.font.Font, small: pygame.font.Font, tiny: pygame.font.Font,
-             quick: list[UIButton], buttons: list[UIButton]) -> None:
-        self.draw_background(screen)
-        self.draw_left_panel(screen, font, small, tiny)
-        self.draw_right_panel(screen, font, small, tiny, quick, buttons)
+            desc_text = loc.brief_description if getattr(loc, "visited", False) else loc.long_description
+            lines = wrap_text(desc_text, body_font, desc_rect.width - 36)
+            yy = desc_rect.y + 36
+            for line in lines:
+                if yy > desc_rect.bottom - 22:
+                    break
+                screen.blit(body_font.render(line, True, TEXT), (desc_rect.x + 18, yy))
+                yy += 22
 
-        # modal (if any)
-        if self.modal is not None:
-            self.modal.layout(screen.get_rect(), font, small)
-            self.modal.draw(screen, font, small)
+            # Items
+            draw_card(screen, items_rect, CARD, radius=16)
+            screen.blit(label_font.render("Items here", True, TEXT_DIM), (items_rect.x + 18, items_rect.y + 10))
+            items_str = ", ".join(loc.items) if loc.items else "(none)"
+            screen.blit(body_font.render(items_str, True, TEXT), (items_rect.x + 18, items_rect.y + 32))
 
-        self.draw_transition(screen)
+            # Output (scrollable)
+            self.draw_output(screen, out_rect, label_font, body_font, mouse_pos)
+
+            # Minimap
+            draw_card(screen, map_rect, CARD, radius=16)
+            screen.blit(label_font.render("Minimap", True, TEXT_DIM), (map_rect.x + 18, map_rect.y + 10))
+            map_inner = pygame.Rect(map_rect.x + 14, map_rect.y + 36, map_rect.width - 28, map_rect.height - 50)
+            self.minimap.draw(screen, map_inner, loc.id_num)
+
+            # Actions card + header
+            draw_card(screen, actions_card, CARD, radius=16)
+            screen.blit(label_font.render("Actions", True, TEXT_DIM), (actions_card.x + 18, actions_card.y + 10))
+
+            # Scrollable actions content, clipped so it stays "behind" the card
+            if self.actions_scroll is not None:
+                # Optional inner border to communicate it's a scroll area
+                pygame.draw.rect(screen, BORDER_SOFT, actions_inner, width=2, border_radius=12)
+
+                prev = self.actions_scroll.begin_clip(screen)
+                y_off = -self.actions_scroll.offset
+
+                for b in buttons:
+                    rr = b.rect.move(0, y_off)
+                    if rr.bottom < actions_inner.top or rr.top > actions_inner.bottom:
+                        continue
+                    # Choose font based on button type (grid uses smaller)
+                    f = cmd_font if rr.height <= 30 else body_font
+                    b.draw(screen, f, mouse_pos, y_offset=y_off)
+
+                self.actions_scroll.end_clip(screen, prev)
+                self.actions_scroll.draw_scrollbar(screen)
+
+            # Modal
+            if self.modal is not None:
+                self.modal.layout(screen.get_rect())
+                self.modal.draw(screen, title_font, body_font, mouse_pos)
+
+            pygame.display.flip()
+
+        pygame.quit()
 
 
 # =====================================================
@@ -788,65 +798,12 @@ class ProfessionalGameUI:
 # =====================================================
 
 def run_pygame_ui(game_data_json: str = "game_data.json", initial_location_id: int = 1) -> None:
-    pygame.init()
-    pygame.display.set_caption("CSC111 Adventure — UofT UI")
-
-    W, H = 1280, 720
-    screen = pygame.display.set_mode((W, H))
-    clock = pygame.time.Clock()
-
-    # Fonts (system)
-    font = pygame.font.SysFont("arial", 28, bold=True)
-    small = pygame.font.SysFont("arial", 20)
-    tiny = pygame.font.SysFont("arial", 16)
-
-    # Game
-    log = EventList()
+    """Create the game + UI and start the window."""
+    game_log = EventList()
     game = AdventureGame(game_data_json, initial_location_id)
-    ui = ProfessionalGameUI(game, log)
-
-    ui.push(ui.current_desc())
-    loc = game.get_location()
-    if getattr(loc, "items", None) and len(loc.items) > 0:
-        ui.push("Items here: " + ", ".join(loc.items))
-
-    running = True
-    mouse_down = False
-
-    while running and game.ongoing:
-        dt = clock.tick(60) / 1000.0
-        mouse_pos = pygame.mouse.get_pos()
-
-        quick, buttons = ui.build_buttons(screen.get_rect())
-
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                running = False
-
-            elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                mouse_down = True
-                ui.click(mouse_pos, quick, buttons)
-
-            elif e.type == pygame.MOUSEBUTTONUP and e.button == 1:
-                mouse_down = False
-
-            elif e.type == pygame.MOUSEWHEEL:
-                ui.wheel(e.y)
-
-            elif e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_ESCAPE:
-                    if ui.modal is not None:
-                        ui.modal.start_close()
-                    else:
-                        game.ongoing = False
-
-        ui.update(dt, mouse_pos, mouse_down, quick, buttons)
-        ui.draw(screen, font, small, tiny, quick, buttons)
-
-        pygame.display.flip()
-
-    pygame.quit()
+    ui = GameUI(game, game_log)
+    ui.run()
 
 
 if __name__ == "__main__":
-    run_pygame_ui("game_data.json", 1)
+    run_pygame_ui()
