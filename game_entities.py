@@ -19,6 +19,7 @@ please consult our Course Syllabus.
 This file is Copyright (c) 2026 CSC111 Teaching Team
 """
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -39,13 +40,11 @@ class Location:
     # All locations in your game MUST be represented as an instance of this class.
 
     id_num: int
-    name: str
-    brief_description: str
-    long_description: str
+    description: dict[str, str]
     available_commands: dict[str, int]
     items: list[str]
-    restrictions: dict[str, int]
-    rewards: dict[str, str]
+    restrictions: Any
+    rewards: Any
     visited: bool = False
 
 

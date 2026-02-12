@@ -51,7 +51,7 @@ class AdventureGameSimulation:
 
         initial_location = self._game.get_location()
 
-        self._events.add_event(Event(initial_location.id_num, initial_location.brief_description))
+        self._events.add_event(Event(initial_location.id_num, initial_location.description['brief_description']))
 
         # Hint: Call self.generate_events with the appropriate arguments
 
@@ -67,26 +67,40 @@ class AdventureGameSimulation:
           OR are non-movement commands (e.g., "inventory", "score"), which keep the player
           in the same location for simulation logging purposes.
         """
-        # Hint: current_location.available_commands[command] will return the next location ID resulting from executing
-        # <command> while in <current_location_id>
-
         curr_location = current_location
 
         for command in commands:
-            if command in curr_location.available_commands:
-                next_location_id = curr_location.available_commands[command]
-                next_location = self._game.get_location(next_location_id)
+            normalized = command.strip().lower()
+            next_location = curr_location
+
+            if normalized in curr_location.available_commands:
+                next_location_id = curr_location.available_commands[normalized]
+                can_enter, _ = self._game.can_enter_location(next_location_id)
+                if can_enter:
+                    self._game.current_location_id = next_location_id
+                    next_location = self._game.get_location(next_location_id)
             else:
-                # Non-movement commands do not change location in this simulator.
-                next_location = curr_location
+                self._process_non_movement_command(normalized)
+                next_location = self._game.get_location()
 
-            new_event = Event(next_location.id_num, next_location.brief_description)
-
+            new_event = Event(next_location.id_num, next_location.description['brief_description'])
             self._events.add_event(new_event)
-
             curr_location = next_location
 
         self._game.current_location_id = curr_location.id_num
+
+    def _process_non_movement_command(self, command: str) -> None:
+        """Apply non-movement commands to simulation game state."""
+        parts = command.split(maxsplit=1)
+        if len(parts) != 2:
+            return
+
+        verb, item_name = parts
+        if verb == "take":
+            self._game.pick_up(item_name)
+        elif verb == "drop" and self._game.drop(item_name):
+            self._game.check_quest(item_name)
+            self._game.apply_location_rewards(item_name)
 
     def get_id_log(self) -> list[int]:
         """
@@ -134,52 +148,59 @@ if __name__ == "__main__":
 
     # Demo walkthrough for winning and losing states.
     win_walkthrough = [
-        "go west", "go west", "go west", "go west", "take lucky mug",
+        "take student card",
+        "go west", "take signed extension request", "go west", "take dorm key", "go west", "take lucky mug",
         "go east", "go east", "go east", "go east",
         "go south", "go east", "go east", "go east", "take usb drive",
-        "go west", "go north", "go north",
-        "go east", "go east", "go south", "go east", "go south", "take laptop charger",
-        "go north", "go west", "go north", "go west", "go west",
-        "go south", "go south", "go west", "go west", "go north",
-        "drop lucky mug", "drop usb drive", "drop laptop charger",
+        "go west", "go north", "go north", "go east", "go east", "go south", "go east", "take toonie",
+        "go west", "go north", "go west", "go west", "go south", "go south", "go south", "go south",
+        "go west", "go west", "go west", "drop toonie",
+        "go east", "go east", "go east", "go north", "go north", "go north", "go north", "go east", "go east",
+        "go south", "go east", "go south", "go south", "drop coffee",
+        "go north", "go east", "take laptop charger",
+        "go west", "go north", "go west", "go north", "go west", "go west", "go south", "go south", "go west",
+        "go west", "go north",
+        "drop lucky mug", "drop usb drive", "drop laptop charger", "submit early"
     ]
     expected_log = [
-        1, 2, 3, 4, 5, 5,
-        4, 3, 2, 1,
-        9, 10, 11, 12, 12,
-        11, 13, 14,
-        16, 17, 18, 19, 20, 20,
-        19, 18, 17, 16, 14,
-        13, 11, 10, 9, 1, 1, 1, 1
+        2, 2, 3, 3, 4, 4, 5, 5, 4, 3, 2, 1, 9, 10, 11, 12, 12, 11, 13, 14, 16, 17, 18, 19, 19, 18,
+        17, 16, 14, 13, 11, 31, 29, 30, 28, 27, 27, 28, 30, 29, 31, 11, 13, 14, 16, 17, 18, 19, 20, 33,
+        33, 20, 21, 21, 20, 19, 18, 17, 16, 14, 13, 11, 10, 9, 1, 1, 1, 1, 1
     ]
-    sim = AdventureGameSimulation('game_data.json', 1, win_walkthrough)
+    sim = AdventureGameSimulation('game_data.json', 2, win_walkthrough)
     assert expected_log == sim.get_id_log()
 
-    # Create a list of all the commands needed to walk through your game to reach a 'game over' state
+    # Create a list of all the commands needed to walk through your game to reach a 'game over' state.
     lose_demo = ["go west", "go east"] * 33 + ["go west"]  # 67 movement commands
-    expected_log = [1] + [2 if i % 2 == 1 else 1 for i in range(1, 67)] + [2]
-    sim = AdventureGameSimulation('game_data.json', 1, lose_demo)
+    expected_log = [2] + [3 if i % 2 == 1 else 2 for i in range(1, 67)] + [3]
+    sim = AdventureGameSimulation('game_data.json', 2, lose_demo)
     assert expected_log == sim.get_id_log()
 
     # Feature demos: inventory, score, and enhancement behaviors.
-    inventory_demo = ["go west", "inventory", "go east"]
-    expected_log = [1, 2, 2, 1]
-    sim = AdventureGameSimulation('game_data.json', 1, inventory_demo)
+    inventory_demo = ["take student card", "inventory", "go west",
+                      "take signed extension request", "inventory", "go east"]
+    expected_log = [2, 2, 2, 3, 3, 3, 2]
+    sim = AdventureGameSimulation('game_data.json', 2, inventory_demo)
     assert expected_log == sim.get_id_log()
 
     scores_demo = [
-        "go west", "go west", "go west", "go west",
-        "go east", "go east", "go east", "go east",
-        "score"
+        "take student card",
+        "go west", "go west", "take dorm key", "go east", "go east", "go east",
+        "go south", "go east", "go east", "go east", "take usb drive",
+        "go west", "go west", "go west", "go north", "drop usb drive", "score"
     ]
-    expected_log = [1, 2, 3, 4, 5, 4, 3, 2, 1, 1]
-    sim = AdventureGameSimulation('game_data.json', 1, scores_demo)
+    expected_log = [2, 2, 3, 4, 4, 3, 2, 1, 9, 10, 11, 12, 12, 11, 10, 9, 1, 1, 1]
+    sim = AdventureGameSimulation('game_data.json', 2, scores_demo)
     assert expected_log == sim.get_id_log()
 
     # Add more enhancement_demos if you have more enhancements
-    enhancement1_demo = ["look", "go south", "go east", "log", "go west", "go north"]
-    expected_log = [1, 1, 9, 10, 10, 9, 1]
-    sim = AdventureGameSimulation('game_data.json', 1, enhancement1_demo)
+    enhancement1_demo = [
+        "take student card", "go west", "take signed extension request", "go west", "take dorm key",
+        "go east", "go east", "go east", "go south", "go east", "go east",
+        "go north", "go north", "go north", "drop signed extension request"
+    ]
+    expected_log = [2, 2, 3, 3, 4, 4, 3, 2, 1, 9, 10, 11, 13, 14, 32, 32]
+    sim = AdventureGameSimulation('game_data.json', 2, enhancement1_demo)
     assert expected_log == sim.get_id_log()
 
     # Note: You can add more code below for your own testing purposes
