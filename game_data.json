@@ -21,7 +21,8 @@
         "go west": 3
       },
       "items": [
-        "student card"
+        "student card",
+        "cookie"
       ]
     },
     {
@@ -34,7 +35,8 @@
         "go west": 4
       },
       "items": [
-        "stapler"
+        "signed extension request",
+        "camera strap"
       ]
     },
     {
@@ -47,7 +49,7 @@
         "go west": 5
       },
       "items": [
-        "campus map"
+        "dorm key"
       ]
     },
     {
@@ -72,7 +74,8 @@
         "go south": 3
       },
       "items": [
-        "gym pass"
+        "gym pass",
+        "campus map"
       ]
     },
     {
@@ -96,9 +99,7 @@
       "available_commands": {
         "go west": 7
       },
-      "items": [
-        "umbrella"
-      ]
+      "items": []
     },
     {
       "id": 9,
@@ -110,7 +111,8 @@
         "go east": 10
       },
       "items": [
-        "protein bar"
+        "protein bar",
+        "umbrella"
       ]
     },
     {
@@ -130,7 +132,7 @@
       "id": 11,
       "name": "Robarts Entrance",
       "brief_description": "LOCATION 11\nWarm air, security gates, and hushed voices.",
-      "long_description": "LOCATION 11\nThe entrance is a threshold: outside stress becomes inside stress, just quieter. The gates beep\nat someone nearby. A sign asks for silence with the authority of a final exam.\n\nExits: west (to Robarts Plaza), east (to Robarts Study Hall), north (to Sid Smith Hallway).",
+      "long_description": "LOCATION 11\nThe entrance is a threshold: outside stress becomes inside stress, just quieter. The gates beep\nat someone nearby. A sign asks for silence with the authority of a final exam.\n\nExits: west (to Robarts Plaza), east (to Robarts Study Hall), north (to Sid Smith Hallway), south (to Underground Tunnel).",
       "available_commands": {
         "go west": 10,
         "go east": 12,
@@ -150,7 +152,8 @@
         "go west": 11
       },
       "items": [
-        "usb drive"
+        "usb drive",
+        "library book"
       ]
     },
     {
@@ -170,10 +173,11 @@
       "id": 14,
       "name": "Sid Smith Lobby",
       "brief_description": "LOCATION 14\nOpen lobby; stairs and echoes.",
-      "long_description": "LOCATION 14\nThe lobby is brighter than the hallways, with echoes that make every footstep dramatic.\nThere’s a screen showing upcoming talks you don’t have time for.\n\nExits: south (to Sid Smith Hallway), east (to Philosopher's Walk North).",
+      "long_description": "LOCATION 14\nThe lobby is brighter than the hallways, with echoes that make every footstep dramatic.\nThere’s a screen showing upcoming talks you don’t have time for.\n\nExits: south (to Sid Smith Hallway), east (to Philosopher's Walk North), north (to Professor's Office).",
       "available_commands": {
         "go south": 13,
-        "go east": 16
+        "go east": 16,
+        "go north": 32
       },
       "items": [
         "clicker"
@@ -188,7 +192,8 @@
         "go south": 16
       },
       "items": [
-        "camera strap"
+        "lost-and-found tag",
+        "pencil"
       ]
     },
     {
@@ -202,7 +207,7 @@
         "go north": 15
       },
       "items": [
-        "notebook"
+        "hand sanitizer"
       ]
     },
     {
@@ -248,13 +253,15 @@
       "id": 20,
       "name": "Bahen 1F",
       "brief_description": "LOCATION 20\nTables, outlets, and quiet concentration.",
-      "long_description": "LOCATION 20\nThe first floor is a sea of tables and charging cables. Someone has a mechanical keyboard\nthat sounds like it’s trying to start a war. You spot a familiar-looking charger brick… maybe.\n\nExits: north (to Bahen Main Doors), east (to Bahen 2F Labs).",
+      "long_description": "LOCATION 20\nThe first floor is a sea of tables and charging cables. Someone has a mechanical keyboard\nthat sounds like it’s trying to start a war. You spot a familiar-looking charger brick… definitely.\n\nExits: north (to Bahen Main Doors), east (to Bahen 2F Labs), south (to TA Help Table).",
       "available_commands": {
         "go north": 19,
-        "go east": 21
+        "go east": 21,
+        "go south": 33
       },
       "items": [
-        "laptop charger"
+        "laptop charger",
+        "python cheat sheet"
       ]
     },
     {
@@ -266,9 +273,7 @@
         "go west": 20,
         "go south": 25
       },
-      "items": [
-        "python cheat sheet"
-      ]
+      "items": []
     },
     {
       "id": 22,
@@ -280,7 +285,7 @@
         "go south": 26
       },
       "items": [
-        "pencil"
+        "blue pen"
       ]
     },
     {
@@ -293,7 +298,8 @@
         "go west": 24
       },
       "items": [
-        "hand sanitizer"
+        "flashcard deck",
+        "group meeting notes"
       ]
     },
     {
@@ -304,9 +310,7 @@
       "available_commands": {
         "go east": 23
       },
-      "items": [
-        "flashcard deck"
-      ]
+      "items": []
     },
     {
       "id": 25,
@@ -317,7 +321,8 @@
         "go north": 21
       },
       "items": [
-        "printed report"
+        "printed report",
+        "spare paper"
       ]
     },
     {
@@ -329,9 +334,7 @@
         "go north": 22,
         "go east": 27
       },
-      "items": [
-        "blue pen"
-      ]
+      "items": []
     },
     {
       "id": 27,
@@ -350,29 +353,31 @@
       "id": 28,
       "name": "Student Commons",
       "brief_description": "LOCATION 28\nCouches, chatter, and exhausted faces.",
-      "long_description": "LOCATION 28\nPeople are slumped on couches like they’ve been defeated by midterms. Someone laughs too\nloudly. Someone else stares into their laptop like it’s a portal.\n\nExits: west (to Cafe Alley), east (to Help Desk Nook).",
+      "long_description": "LOCATION 28\nPeople are slumped on couches like they’ve been defeated by midterms. Someone laughs too\nloudly. Someone else stares into their laptop like it’s a portal.\n\nExits: west (to Cafe Alley), east (to Help Desk Nook), south (to Lost & Found Counter).",
       "available_commands": {
         "go west": 27,
-        "go east": 30
+        "go east": 30,
+        "go south": 34
       },
       "items": [
         "headphones",
-        "cookie",
-        "water bottle"
+        "water bottle",
+        "office hours token"
       ]
     },
     {
       "id": 29,
       "name": "Print Lab",
       "brief_description": "LOCATION 29\nPrinters, paper trays, and toner smell.",
-      "long_description": "LOCATION 29\nThe print lab feels like a production line for deadlines. A printer jams, someone sighs, and the\nworld continues. A label maker sits on a table like it has authority.\n\nExits: west (to Help Desk Nook).",
+      "long_description": "LOCATION 29\nThe print lab feels like a production line for deadlines. A printer jams, someone sighs, and the\nworld continues. A label maker sits on a table like it has authority.\n\nExits: west (to Help Desk Nook), north (to Underground Tunnel).",
       "available_commands": {
         "go west": 30,
         "go north": 31
       },
       "items": [
         "sticker sheet",
-        "spare paper"
+        "assignment cover sheet",
+        "stapler"
       ]
     },
     {
@@ -394,322 +399,413 @@
       "id": 31,
       "name": "Underground Tunnel",
       "brief_description": "LOCATION 31\nA narrow underground tunnel beneath campus.",
-      "long_description": "LOCATION 31\nThe tunnel is low and concrete-lined, lit by flickering fluorescent lights that hum just loudly\n enough to be unsettling. Old pipes run along the ceiling, wrapped in peeling insulation. This\n feels like infrastructure students were never meant to see—just a forgotten artery beneath\n campus, connecting places without asking permission.\n\nExits: west (to Robarts Entrance), east (to Print Lab).",
+      "long_description": "LOCATION 31\nThe tunnel is low and concrete-lined, lit by flickering fluorescent lights that hum just loudly\nenough to be unsettling. Old pipes run along the ceiling, wrapped in peeling insulation. This\nfeels like infrastructure students were never meant to see—just a forgotten artery beneath\ncampus, connecting places without asking permission.\n\nExits: west (to Robarts Entrance), east (to Print Lab).",
       "available_commands": {
-        "go north": 11,
-        "go south": 29
+        "go west": 11,
+        "go east": 29
+      },
+      "items": []
+    },
+    {
+      "id": 32,
+      "name": "Professor's Office",
+      "brief_description": "LOCATION 32\nA closed door, a nameplate, and consequences.",
+      "long_description": "LOCATION 32\nA narrow corridor ends at a door with a crisp nameplate. The kind of door you only knock on\nwhen you have a question, a confession, or paperwork that can't be ignored. Somewhere inside,\na keyboard clicks at a pace that sounds like judgment.\n\nExits: south (to Sid Smith Lobby).",
+      "available_commands": {
+        "go south": 14
+      },
+      "items": []
+    },
+    {
+      "id": 33,
+      "name": "TA Help Table",
+      "brief_description": "LOCATION 33\nA folding table, a queue, and salvation.",
+      "long_description": "LOCATION 33\nA folding table has been claimed as an unofficial triage unit for debugging. Someone’s laptop\nis open to a trace that looks like a horror story. The TA’s eyes say they’ve seen everything.\n\nExits: north (to Bahen 1F).",
+      "available_commands": {
+        "go north": 20
+      },
+      "items": []
+    },
+    {
+      "id": 34,
+      "name": "Lost & Found Counter",
+      "brief_description": "LOCATION 34\nA small counter with a clipboard and a tired smile.",
+      "long_description": "LOCATION 34\nA small counter tucked behind the commons. A clipboard lists items people swear they didn’t\nlose. Someone has written “PLEASE LABEL YOUR THINGS” in aggressive all-caps.\n\nExits: north (to Student Commons).",
+      "available_commands": {
+        "go north": 28
       },
       "items": []
     }
   ],
   "items": [
-  {
-    "name": "usb drive",
-    "description": "Your only copy of the project. Losing this is instant tragedy.",
-    "hint": "Where you started, where the code lives, where the deadline waits.",
-    "completion_text": "You plug the USB in. The files are there. For the first time today, you breathe.",
-    "start_position": 12,
-    "target_position": 1,
-    "target_points": 20
-  },
-  {
-    "name": "laptop charger",
-    "description": "A familiar charger brick. Your battery is not going to survive without it.",
-    "hint": "Power belongs near the desk that refuses to sleep.",
-    "completion_text": "The charging light flicks on. Time just became negotiable again.",
-    "start_position": 20,
-    "target_position": 1,
-    "target_points": 20
-  },
-  {
-    "name": "lucky mug",
-    "description": "The mug that carried you through every late night. You refuse to submit without it.",
-    "hint": "It belongs where coffee turns panic into progress.",
-    "completion_text": "You set the mug down carefully. Superstition satisfied.",
-    "start_position": 5,
-    "target_position": 1,
-    "target_points": 20
-  },
-
-  {
-    "name": "student card",
-    "description": "Your UofT student card. You feel naked without it.",
-    "hint": "You always leave it where you feel most like yourself.",
-    "completion_text": "You slide the card onto your desk. Identity restored.",
-    "start_position": 2,
-    "target_position": 1,
-    "target_points": 2
-  },
-  {
-    "name": "stapler",
-    "description": "A small stapler. Weirdly comforting.",
-    "hint": "Paperwork tends to pile up where ink and printers collide.",
-    "completion_text": "You add it to the supply pile. Organization increases by 1.",
-    "start_position": 3,
-    "target_position": 25,
-    "target_points": 1
-  },
-  {
-    "name": "campus map",
-    "description": "A folded campus map with coffee stains and frantic circles.",
-    "hint": "Once you’re home, you won’t need this anymore.",
-    "completion_text": "You flatten the map out, then shove it into a drawer. Done with wandering.",
-    "start_position": 4,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "gym pass",
-    "description": "A gym pass card. The universe is insisting you do cardio today.",
-    "hint": "Its purpose is fulfilled exactly where it was issued.",
-    "completion_text": "You nod at the gym like you’ll be back. Maybe.",
-    "start_position": 6,
-    "target_position": 6,
-    "target_points": 1
-  },
-  {
-    "name": "bus ticket",
-    "description": "An unpunched TTC transfer. It might still be valid… maybe.",
-    "hint": "Transportation worries end where you sleep.",
-    "completion_text": "You toss the ticket aside. You’re not going anywhere now.",
-    "start_position": 7,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "umbrella",
-    "description": "A battered umbrella that still pretends it works.",
-    "hint": "Shelter first. Weather later.",
-    "completion_text": "You lean it by the door. It drips quietly, defeated.",
-    "start_position": 8,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "protein bar",
-    "description": "Emergency calories. Tastes like cardboard. Still worth it.",
-    "hint": "Food belongs wherever the grind happens.",
-    "completion_text": "You stash it on your desk. Future-you says thanks.",
-    "start_position": 9,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "sticky notes",
-    "description": "A rainbow stack of reminders: \"FIX TYPES\", \"RUN PYTHONT A\", \"DON'T PANIC\".",
-    "hint": "They stick best where mistakes are made.",
-    "completion_text": "You plaster them onto your monitor. The wall of shame grows.",
-    "start_position": 10,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "study timer",
-    "description": "A tiny timer. It makes time feel louder.",
-    "hint": "Time matters most where seconds disappear.",
-    "completion_text": "You reset the timer. This time, you’re ready.",
-    "start_position": 11,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "lecture notes",
-    "description": "Messy lecture notes written under academic duress.",
-    "hint": "They belong beside the code they were meant to help.",
-    "completion_text": "You flip through them once, then stack them neatly.",
-    "start_position": 13,
-    "target_position": 1,
-    "target_points": 2
-  },
-  {
-    "name": "clicker",
-    "description": "An old lecture clicker. Still clings to relevance.",
-    "hint": "Some things never really leave where they started.",
-    "completion_text": "You set it down. Attendance taken. Semester remembered.",
-    "start_position": 14,
-    "target_position": 14,
-    "target_points": 1
-  },
-  {
-    "name": "camera strap",
-    "description": "A camera strap with a cracked clip.",
-    "hint": "Lost things tend to return to where people gather.",
-    "completion_text": "You leave it where someone might recognize it.",
-    "start_position": 15,
-    "target_position": 3,
-    "target_points": 1
-  },
-  {
-    "name": "notebook",
-    "description": "A notebook filled with half-plans and real ideas.",
-    "hint": "Ideas grow where projects are finished.",
-    "completion_text": "You open it to a blank page. It feels earned.",
-    "start_position": 16,
-    "target_position": 1,
-    "target_points": 2
-  },
-  {
-    "name": "scarf",
-    "description": "A warm scarf. Confidence multiplier: +3%.",
-    "hint": "Warmth waits where nights are longest.",
-    "completion_text": "You hang it up. The room feels safer already.",
-    "start_position": 17,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "spare usb cable",
-    "description": "A spare USB cable. Underrated hero.",
-    "hint": "Backups belong near the main machine.",
-    "completion_text": "You coil it carefully. Redundancy achieved.",
-    "start_position": 18,
-    "target_position": 1,
-    "target_points": 2
-  },
-  {
-    "name": "toonie",
-    "description": "A shiny toonie. It feels like an apology.",
-    "hint": "Warm drinks wait where coffee smells strongest.",
-    "completion_text": "You trade it for caffeine. Fair deal.",
-    "start_position": 19,
-    "target_position": 27,
-    "target_points": 1
-  },
-  {
-    "name": "python cheat sheet",
-    "description": "Handwritten syntax and warnings about mutation.",
-    "hint": "The proof wall waits for useful lies.",
-    "completion_text": "You tack it up. The language feels friendlier.",
-    "start_position": 21,
-    "target_position": 1,
-    "target_points": 2
-  },
-  {
-    "name": "pencil",
-    "description": "A chewed pencil. Survivor of stress.",
-    "hint": "Writing ends where work begins.",
-    "completion_text": "You toss it onto the desk. It’s seen enough.",
-    "start_position": 22,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "hand sanitizer",
-    "description": "A tiny bottle with weaponized alcohol smell.",
-    "hint": "Clean hands near shared knowledge.",
-    "completion_text": "You leave it by the door. A public service.",
-    "start_position": 23,
-    "target_position": 24,
-    "target_points": 1
-  },
-  {
-    "name": "flashcard deck",
-    "description": "A deck of flashcards. Top card: \"Big-O\".",
-    "hint": "Once the exam is over, they come home.",
-    "completion_text": "You put them away. The threat is neutralized.",
-    "start_position": 24,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "printed report",
-    "description": "A draft marked in red. Judgment incarnate.",
-    "hint": "It belongs beside the code it critiques.",
-    "completion_text": "You line it up with the screen. Final pass begins.",
-    "start_position": 25,
-    "target_position": 1,
-    "target_points": 5
-  },
-  {
-    "name": "blue pen",
-    "description": "A pen that smudges instantly.",
-    "hint": "Ink rests where thinking happens.",
-    "completion_text": "You cap it. No more edits—for now.",
-    "start_position": 26,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "coffee",
-    "description": "Cold coffee. Still powerful.",
-    "hint": "Fuel the final stretch.",
-    "completion_text": "You take a sip. Regret. Energy.",
-    "start_position": 27,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "headphones",
-    "description": "Headphones with uneven balance.",
-    "hint": "Silence belongs where focus lives.",
-    "completion_text": "You put them on. The world fades out.",
-    "start_position": 28,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "cookie",
-    "description": "A wrapped cookie. Strategic sugar.",
-    "hint": "Rewards come home.",
-    "completion_text": "You save it. Motivation secured.",
-    "start_position": 28,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "water bottle",
-    "description": "A dented bottle. Still loyal.",
-    "hint": "Hydration is safest at base.",
-    "completion_text": "You refill it. Small win.",
-    "start_position": 28,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "sticker sheet",
-    "description": "Tiny stickers with zero productivity value.",
-    "hint": "Decorations belong where victories are earned.",
-    "completion_text": "You stick one on your laptop. Morale increases.",
-    "start_position": 29,
-    "target_position": 1,
-    "target_points": 1
-  },
-  {
-    "name": "spare paper",
-    "description": "Clean pages. Rare commodity.",
-    "hint": "Paper piles up near printers.",
-    "completion_text": "You add it to the stack. Resources secured.",
-    "start_position": 29,
-    "target_position": 25,
-    "target_points": 1
-  },
-  {
-    "name": "calculator",
-    "description": "A solar calculator with scars.",
-    "hint": "Math lives where problems are solved.",
-    "completion_text": "You place it down. Numbers behave again.",
-    "start_position": 30,
-    "target_position": 1,
-    "target_points": 2
-  },
-  {
-    "name": "lab access form",
-    "description": "A form that demands authority.",
-    "hint": "Sometimes paperwork never really leaves the desk.",
-    "completion_text": "You set it aside. Not today.",
-    "start_position": 30,
-    "target_position": 30,
-    "target_points": 1
-  },
-  {
-    "name": "marker",
-    "description": "A squeaky dry-erase marker.",
-    "hint": "Whiteboards wait near ideas.",
-    "completion_text": "You cap it quickly. No more noise.",
-    "start_position": 30,
-    "target_position": 11,
-    "target_points": 1
-  }
-]
+    {
+      "name": "usb drive",
+      "description": "Your only copy of the project. Losing this is instant tragedy.",
+      "hint": "Where you started, where the code lives, where the deadline waits.",
+      "completion_text": "You plug the USB in. The files are there. For the first time today, you breathe.",
+      "start_position": 12,
+      "target_position": 1,
+      "target_points": 20
+    },
+    {
+      "name": "laptop charger",
+      "description": "A familiar charger brick. Your battery is not going to survive without it.",
+      "hint": "Power belongs near the desk that refuses to sleep.",
+      "completion_text": "The charging light flicks on. Time just became negotiable again.",
+      "start_position": 20,
+      "target_position": 1,
+      "target_points": 20
+    },
+    {
+      "name": "lucky mug",
+      "description": "The mug that carried you through every late night. You refuse to submit without it.",
+      "hint": "It belongs where coffee turns panic into progress.",
+      "completion_text": "You set the mug down carefully. Superstition satisfied.",
+      "start_position": 5,
+      "target_position": 1,
+      "target_points": 20
+    },
+    {
+      "name": "student card",
+      "description": "Your UofT student card. You feel naked without it.",
+      "hint": "It belongs with your keys and your laptop—your base reality.",
+      "completion_text": "You slide the card onto your desk. Identity restored.",
+      "start_position": 2,
+      "target_position": 1,
+      "target_points": 2
+    },
+    {
+      "name": "stapler",
+      "description": "A small stapler. Weirdly comforting.",
+      "hint": "Paperwork tends to pile up where ink and printers collide.",
+      "completion_text": "You set it beside the printer station. Organization increases by 1.",
+      "start_position": 29,
+      "target_position": 29,
+      "target_points": 1
+    },
+    {
+      "name": "campus map",
+      "description": "A folded campus map with coffee stains and frantic circles.",
+      "hint": "Routes make sense at the junction where choices split.",
+      "completion_text": "You hand it off. Someone else can wander now.",
+      "start_position": 6,
+      "target_position": 6,
+      "target_points": 1
+    },
+    {
+      "name": "gym pass",
+      "description": "A gym pass card. The universe is insisting you do cardio today.",
+      "hint": "Its purpose is fulfilled exactly where it was issued.",
+      "completion_text": "You nod at the gym like you’ll be back. Maybe.",
+      "start_position": 6,
+      "target_position": 6,
+      "target_points": 1
+    },
+    {
+      "name": "bus ticket",
+      "description": "An unpunched TTC transfer. It might still be valid… maybe.",
+      "hint": "Someone at the campus edge always needs a way out.",
+      "completion_text": "You pass it over. One less worry in the city wind.",
+      "start_position": 7,
+      "target_position": 7,
+      "target_points": 1
+    },
+    {
+      "name": "umbrella",
+      "description": "A battered umbrella that still pretends it works.",
+      "hint": "Weather matters most on long walks between buildings.",
+      "completion_text": "You hook it on a railing. Practicality achieved.",
+      "start_position": 9,
+      "target_position": 9,
+      "target_points": 1
+    },
+    {
+      "name": "protein bar",
+      "description": "Emergency calories. Tastes like cardboard. Still worth it.",
+      "hint": "Food belongs wherever the grind happens.",
+      "completion_text": "You stash it where studying hurts. Future-you says thanks.",
+      "start_position": 9,
+      "target_position": 12,
+      "target_points": 1
+    },
+    {
+      "name": "sticky notes",
+      "description": "A rainbow stack of reminders: \"FIX TYPES\", \"RUN PYTHONT A\", \"DON'T PANIC\".",
+      "hint": "They stick best where problems get solved out loud.",
+      "completion_text": "You slap them onto the help table. The wall of shame begins.",
+      "start_position": 10,
+      "target_position": 33,
+      "target_points": 1
+    },
+    {
+      "name": "study timer",
+      "description": "A tiny timer. It makes time feel louder.",
+      "hint": "Time matters most where silence amplifies it.",
+      "completion_text": "You set it down. Seconds become a resource again.",
+      "start_position": 11,
+      "target_position": 12,
+      "target_points": 1
+    },
+    {
+      "name": "lecture notes",
+      "description": "Messy lecture notes written under academic duress.",
+      "hint": "Bring them to someone who can translate panic into steps.",
+      "completion_text": "The TA flips through them and nods. You feel less doomed.",
+      "start_position": 13,
+      "target_position": 33,
+      "target_points": 3
+    },
+    {
+      "name": "clicker",
+      "description": "An old lecture clicker. Still clings to relevance.",
+      "hint": "Some things never really leave where they started.",
+      "completion_text": "You set it down. Attendance taken. Semester remembered.",
+      "start_position": 14,
+      "target_position": 14,
+      "target_points": 1
+    },
+    {
+      "name": "camera strap",
+      "description": "A camera strap with a cracked clip.",
+      "hint": "Return it to a public place where someone might claim it.",
+      "completion_text": "You leave it at the lobby desk. Someone will be relieved.",
+      "start_position": 3,
+      "target_position": 34,
+      "target_points": 1
+    },
+    {
+      "name": "hand sanitizer",
+      "description": "A tiny bottle with weaponized alcohol smell.",
+      "hint": "Clean hands near shared knowledge.",
+      "completion_text": "You place it by the library entrance. A public service.",
+      "start_position": 16,
+      "target_position": 24,
+      "target_points": 1
+    },
+    {
+      "name": "notebook",
+      "description": "A notebook filled with half-plans and real ideas.",
+      "hint": "Ideas sharpen when you explain them to someone else.",
+      "completion_text": "You open it at the help table. Suddenly you have a plan.",
+      "start_position": 1,
+      "target_position": 33,
+      "target_points": 2
+    },
+    {
+      "name": "scarf",
+      "description": "A warm scarf. Confidence multiplier: +3%.",
+      "hint": "Warmth matters at the windy open gate.",
+      "completion_text": "You lend it out. The wind feels less hostile—somehow.",
+      "start_position": 17,
+      "target_position": 7,
+      "target_points": 1
+    },
+    {
+      "name": "spare usb cable",
+      "description": "A spare USB cable. Underrated hero.",
+      "hint": "Backups belong near the lab machines.",
+      "completion_text": "You coil it near the terminals. Redundancy achieved.",
+      "start_position": 18,
+      "target_position": 21,
+      "target_points": 2
+    },
+    {
+      "name": "toonie",
+      "description": "A shiny toonie. It feels like an apology.",
+      "hint": "Warm drinks wait where coffee smells strongest.",
+      "completion_text": "You trade it for caffeine. Fair deal.",
+      "start_position": 19,
+      "target_position": 27,
+      "target_points": 1
+    },
+    {
+      "name": "python cheat sheet",
+      "description": "Handwritten syntax and warnings about mutation.",
+      "hint": "Bring it to the place where bugs go to die.",
+      "completion_text": "You lay it out. Someone whispers, \"legend.\"",
+      "start_position": 20,
+      "target_position": 33,
+      "target_points": 2
+    },
+    {
+      "name": "pencil",
+      "description": "A chewed pencil. Survivor of stress.",
+      "hint": "It belongs where paper gets printed and marked up.",
+      "completion_text": "You drop it by the printer. It’s seen enough.",
+      "start_position": 15,
+      "target_position": 29,
+      "target_points": 1
+    },
+    {
+      "name": "flashcard deck",
+      "description": "A deck of flashcards. Top card: \"Big-O\".",
+      "hint": "They help most where people line up to ask questions.",
+      "completion_text": "You hand them over. Studying becomes contagious.",
+      "start_position": 23,
+      "target_position": 33,
+      "target_points": 1
+    },
+    {
+      "name": "printed report",
+      "description": "A draft marked in red. Judgment incarnate.",
+      "hint": "It belongs at the door with the nameplate.",
+      "completion_text": "You slide it under the door. The act feels irreversible.",
+      "start_position": 25,
+      "target_position": 32,
+      "target_points": 8
+    },
+    {
+      "name": "blue pen",
+      "description": "A pen that smudges instantly.",
+      "hint": "Paperwork gets signed where consequences live.",
+      "completion_text": "You sign what needs signing. The ink looks final.",
+      "start_position": 22,
+      "target_position": 32,
+      "target_points": 1
+    },
+    {
+      "name": "coffee",
+      "description": "Cold coffee. Still powerful.",
+      "hint": "Fuel the final stretch at the help table.",
+      "completion_text": "The TA takes one sip and looks 2% more alive.",
+      "start_position": 27,
+      "target_position": 33,
+      "target_points": 1
+    },
+    {
+      "name": "headphones",
+      "description": "Headphones with uneven balance.",
+      "hint": "Silence belongs where focus lives.",
+      "completion_text": "You set them down. The room finally feels like work.",
+      "start_position": 28,
+      "target_position": 12,
+      "target_points": 1
+    },
+    {
+      "name": "cookie",
+      "description": "A wrapped cookie. Strategic sugar.",
+      "hint": "Bribes work best where help is offered.",
+      "completion_text": "You offer it. The TA pretends not to smile.",
+      "start_position": 2,
+      "target_position": 33,
+      "target_points": 1
+    },
+    {
+      "name": "water bottle",
+      "description": "A dented bottle. Still loyal.",
+      "hint": "Hydration matters where the hours vanish.",
+      "completion_text": "You refill it nearby. Small win.",
+      "start_position": 28,
+      "target_position": 12,
+      "target_points": 1
+    },
+    {
+      "name": "sticker sheet",
+      "description": "Tiny stickers with zero productivity value.",
+      "hint": "Morale belongs where panic gets treated.",
+      "completion_text": "You slap one onto the table. Morale increases.",
+      "start_position": 29,
+      "target_position": 33,
+      "target_points": 1
+    },
+    {
+      "name": "spare paper",
+      "description": "Clean pages. Rare commodity.",
+      "hint": "Paper belongs with the boxes behind the bookstore.",
+      "completion_text": "You add it to the stack. Resources secured.",
+      "start_position": 25,
+      "target_position": 25,
+      "target_points": 1
+    },
+    {
+      "name": "calculator",
+      "description": "A solar calculator with scars.",
+      "hint": "Numbers behave best in silent rooms.",
+      "completion_text": "You place it down. The math stops fighting back.",
+      "start_position": 30,
+      "target_position": 12,
+      "target_points": 2
+    },
+    {
+      "name": "lab access form",
+      "description": "A form that demands authority.",
+      "hint": "Submit it where admin energy thrives.",
+      "completion_text": "You drop it off. Bureaucracy appeased.",
+      "start_position": 30,
+      "target_position": 3,
+      "target_points": 2
+    },
+    {
+      "name": "marker",
+      "description": "A squeaky dry-erase marker.",
+      "hint": "Whiteboards wait near lab ideas.",
+      "completion_text": "You cap it quickly. No more noise.",
+      "start_position": 30,
+      "target_position": 21,
+      "target_points": 1
+    },
+    {
+      "name": "dorm key",
+      "description": "A dorm key with a tiny crack in the plastic head.",
+      "hint": "If it’s not yours, it belongs at the residence front desk.",
+      "completion_text": "You hand it in. Someone’s night just got easier.",
+      "start_position": 4,
+      "target_position": 3,
+      "target_points": 2
+    },
+    {
+      "name": "office hours token",
+      "description": "A paper token: \"1 PRIORITY QUESTION\". Ridiculous. Powerful.",
+      "hint": "Use it where the debugging line forms.",
+      "completion_text": "You redeem it. The queue parts like the sea.",
+      "start_position": 28,
+      "target_position": 33,
+      "target_points": 3
+    },
+    {
+      "name": "assignment cover sheet",
+      "description": "A crisp cover sheet with boxes for name, student number, and honesty.",
+      "hint": "It needs to reach the professor’s door with the rest of the paperwork.",
+      "completion_text": "You attach it. Suddenly the submission looks real.",
+      "start_position": 29,
+      "target_position": 32,
+      "target_points": 4
+    },
+    {
+      "name": "signed extension request",
+      "description": "A signed request form. It feels like a fragile peace treaty.",
+      "hint": "It belongs in the professor’s hands—before the clock wins.",
+      "completion_text": "You deliver it. The deadline stops feeling inevitable.",
+      "start_position": 3,
+      "target_position": 32,
+      "target_points": 5
+    },
+    {
+      "name": "library book",
+      "description": "A borrowed book with a due date that’s way too soon.",
+      "hint": "Return it where quiet rules and fines begin.",
+      "completion_text": "You return it. Your future bank account thanks you.",
+      "start_position": 12,
+      "target_position": 24,
+      "target_points": 3
+    },
+    {
+      "name": "group meeting notes",
+      "description": "Scrappy notes from a group meeting: tasks, decisions, and one ominous TODO.",
+      "hint": "Bring them to the TA so nobody \"forgets\" what was agreed.",
+      "completion_text": "You hand them over. Accountability enters the chat.",
+      "start_position": 23,
+      "target_position": 33,
+      "target_points": 3
+    },
+    {
+      "name": "lost-and-found tag",
+      "description": "A blank lost-and-found tag and a stub of string.",
+      "hint": "It belongs at the counter where lost things get names again.",
+      "completion_text": "You clip it to the clipboard. Order restored, barely.",
+      "start_position": 15,
+      "target_position": 34,
+      "target_points": 1
+    }
+  ]
 }
-

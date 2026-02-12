@@ -21,7 +21,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Optional, Sequence
 
-# --- CHANGE THIS IMPORT IF NEEDED ---
 from adventure import AdventureGame
 from event_logger import EventList, Event
 
@@ -628,8 +627,11 @@ class GameUI:
             """Pick a drop"""
             self.begin_turn(f"Drop {item_name}")
             if self.game.drop(item_name):
-                self.out(f"Dropped: {item_name}")
-                self.game.check_quest(item_name)
+                if self.game.check_quest(item_name):
+                    self.out(f"{self.game.get_item(item_name).completion_text}")
+                    self.out(f"Your score is now {self.game.score}")
+                else:
+                    self.out(f"Dropped: {item_name}")
 
             else:
                 self.out(f"Could not drop: {item_name}")
@@ -649,7 +651,7 @@ class GameUI:
             self.begin_turn(f"Inspect {item_name}")
             it = self.game.get_item(item_name)
             self.out(it.hint)
-            self.out("That item could not be inspected.")
+            self.out(f"..... It needs to go to {self.game.get_location(it.target_position).name}")
 
         self.modal = ModalPicker("Inspect which item?", options, pick)
 
@@ -701,25 +703,200 @@ class GameUI:
         new_loc = self.game.get_location()
         self.log.add_event(Event(loc.id_num, loc.brief_description), command_key)
         self.game.turn += 1
-        if self.game.max_turns == self.game.turn:
-            if (self.game.score >= self.game.min_score and "lucky mug" in self.game.returned and
+        if self.game.MAX_TURNS == self.game.turn:
+            if (self.game.score >= self.game.MIN_SCORE and "lucky mug" in self.game.returned and
                     "usb drive" in self.game.returned and "laptop charger" in self.game.returned):
-                self.win()
+                self.game.ongoing = False
                 return
             else:
-                self.lose()
+                self.game.ongoing = False
                 return
         self.out(self.location_description())
         if new_loc.items:
             self.out("Items here: " + ", ".join(new_loc.items))
 
+    def do_submit(self) -> None:
+        """Perform a location submit."""
+        self.game.ongoing = False
+
     def win(self) -> None:
-        """Win the game."""
-        self.out("Win")
+        """Show a win screen until the player quits or restarts."""
+        self._end_screen(
+            title="You made it.",
+            subtitle="Submission secured. Disaster avoided.",
+            body_lines=[
+                "You return to your room with the essentials in hand.",
+                "The USB clicks in. The charger light turns on. The lucky mug sits by the keyboard.",
+                "For once, your code is the quietest thing in the room."
+            ],
+            accent=UOFT_LIGHT_BLUE, win=True
+        )
 
     def lose(self) -> None:
-        """Lose the game."""
-        self.out("Lose")
+        """Show a lose screen until the player quits or restarts."""
+        missing = []
+        for req in ("usb drive", "laptop charger", "lucky mug"):
+            if req not in self.game.returned:
+                missing.append(req)
+
+        if self.game.score < self.game.MIN_SCORE:
+            reason = f"Score too low: {self.game.score}/{self.game.MIN_SCORE}."
+        elif missing:
+            reason = "Missing: " + ", ".join(missing) + "."
+        else:
+            reason = "Something went wrong."
+
+        self._end_screen(
+            title="Not this time.",
+            subtitle=reason,
+            body_lines=[
+                "The clock wins. The campus keeps moving anyway.",
+                "You stare at the screen like it might forgive you.",
+                "It doesn’t."
+            ],
+            accent=(180, 60, 60)
+        )
+
+    # ---------- End screen helper ----------
+
+    def _end_screen(self, title: str, subtitle: str, body_lines: list[str], accent: tuple[int, int, int], win = False) -> None:
+        """Block on an end screen UI.
+
+        - Click "Restart" to reset and run the game again.
+        - ESC / Q quits the program.
+        """
+        pygame.font.init()
+        screen = pygame.display.get_surface()
+        if screen is None:
+            screen = pygame.display.set_mode((1280, 720))
+
+        clock = pygame.time.Clock()
+
+        title_font = pygame.font.SysFont("segoeui", 40, bold=True)
+        sub_font = pygame.font.SysFont("segoeui", 18, bold=True)
+        body_font = pygame.font.SysFont("segoeui", 18)
+        hint_font = pygame.font.SysFont("segoeui", 14)
+
+        def draw_centered_text(surf: pygame.Surface, text: str, font: pygame.font.Font,
+                               color: tuple[int, int, int], cx: int, y: int) -> int:
+            """Draw a text on the screen."""
+            img = font.render(text, True, color)
+            rect = img.get_rect(midtop=(cx, y))
+            surf.blit(img, rect)
+            return rect.bottom
+
+        # Build summary lines (safe even if attributes differ)
+        turns_used = getattr(self.game, "turn", 0)
+        turns_max = getattr(self.game, "MAX_TURNS", 0)
+        score = getattr(self.game, "score", 0)
+        min_score = getattr(self.game, "MIN_SCORE", 0)
+        returned = sorted(list(getattr(self.game, "returned", set())))
+        returned_str = ", ".join(returned) if returned else "(none)"
+
+        lines = list(body_lines)
+        lines.append("")
+        lines.append(f"Score: {score} / {min_score}")
+        if turns_max:
+            lines.append(f"Turns used: {turns_used} / {turns_max}")
+        lines.append(f"Returned: {returned_str}")
+
+        # Card + button geometry (recomputed every frame in case window changes)
+
+        running = True
+        while running:
+            clock.tick(60)
+            mouse_pos = pygame.mouse.get_pos()
+
+            # ---- Draw ----
+            screen.blit(vertical_gradient(screen.get_size(), BG_TOP, BG_BOTTOM), (0, 0))
+
+            # Center card
+            card_w, card_h = 860, 520
+            card = pygame.Rect(0, 0, card_w, card_h)
+            card.center = (screen.get_width() // 2, screen.get_height() // 2)
+
+            draw_card(screen, card, PANEL, radius=18)
+
+            # Accent bar
+            bar = pygame.Rect(card.x + 14, card.y + 14, 10, card.height - 28)
+            pygame.draw.rect(screen, accent, bar, border_radius=8)
+
+            cx = card.centerx
+            y = card.y + 44
+
+            y = draw_centered_text(screen, title, title_font, TEXT, cx, y) + 10
+            y = draw_centered_text(screen, subtitle, sub_font, TEXT_DIM, cx, y) + 26
+
+            # Body text (wrapped)
+            max_w = card.width - 90
+            yy = y
+            for paragraph in lines:
+                if paragraph == "":
+                    yy += 10
+                    continue
+                for line in wrap_text(paragraph, body_font, max_w):
+                    img = body_font.render(line, True, TEXT)
+                    rect = img.get_rect(midtop=(cx, yy))
+                    screen.blit(img, rect)
+                    yy += 24
+                yy += 6
+
+            # Buttons / footer
+            btn_w, btn_h = 220, 46
+            restart_rect = pygame.Rect(0, 0, btn_w, btn_h)
+            restart_rect.center = (card.centerx, card.bottom - 78)
+            restart_button = Button(restart_rect, "Restart Game", lambda: None, kind="primary")
+            restart_button.draw(screen, body_font, mouse_pos)
+
+            keep_going_rect = None
+
+            if win:
+                keep_going_rect = pygame.Rect(0, btn_h + 10, btn_w, btn_h)
+                keep_going_rect.center = (card.centerx, card.bottom - (88 + btn_h))
+                keep_going_button = Button(keep_going_rect, "Keep Game", lambda: None, kind = "primary")
+                keep_going_button.draw(screen, body_font, mouse_pos)
+
+            hint = hint_font.render("ESC / Q to quit", True, TEXT_DIM)
+            hint_rect = hint.get_rect(midbottom=(card.centerx, card.bottom - 26))
+            screen.blit(hint, hint_rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+                elif event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_ESCAPE, pygame.K_q):
+                        running = False
+
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if restart_rect.collidepoint(event.pos):
+                        # Reset game state
+                        if hasattr(self.game, "reset") and callable(getattr(self.game, "reset")):
+                            self.game.reset()
+                        else:
+                            # Fallback: try re-calling __init__ with no args (only if that's how your Game is built)
+                            try:
+                                self.game.__init__()  # type: ignore[misc]
+                            except TypeError:
+                                # If neither reset nor no-arg init works, just quit end screen.
+                                running = False
+                                continue
+
+                        # Reset UI state that should not persist across runs
+                        self.actions_scroll = None
+                        self.output_scroll = None
+                        self.modal = None
+
+                        # Restart the UI/game loop
+                        running = False
+                        self.run()
+                        return
+                    if win:
+                        if keep_going_rect.collidepoint(event.pos):
+                            self.game.ongoing = True
+                            return
+
+            pygame.display.flip()
 
     # ---------- Run loop ----------
 
@@ -766,7 +943,7 @@ class GameUI:
 
             # LEFT cards
             header_h = 78
-            desc_h = 210
+            desc_h = 70
             items_h = 64
 
             header_rect = pygame.Rect(left_panel.x, left_panel.y, left_panel.width, header_h)
@@ -820,6 +997,8 @@ class GameUI:
             buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Score", self.do_score, kind="ghost"))
             y += btn_h + btn_gap
             buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Log", self.do_log, kind="ghost"))
+            y += btn_h + btn_gap
+            buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Submit Early", self.do_submit, kind="ghost"))
             y += btn_h + btn_gap
             buttons.append(Button(pygame.Rect(x, y, w, btn_h), "Quit", self.do_quit, kind="ghost"))
             y += btn_h + 16
@@ -911,7 +1090,7 @@ class GameUI:
             header_title = title_font.render(loc.name, True, TEXT)
             screen.blit(header_title, (header_rect.x + 20, header_rect.y + 12))
 
-            turns_left = self.game.max_turns - self.game.turn
+            turns_left = self.game.MAX_TURNS - self.game.turn
             chips_y = header_rect.y + 44
             draw_chip(
                 screen,
@@ -955,10 +1134,10 @@ class GameUI:
             draw_card(screen, items_rect, CARD, radius=16)
             screen.blit(label_font.render("ITEMS HERE", True, TEXT_DIM), (items_rect.x + 18, items_rect.y + 10))
             if not loc.items:
-                items_str = "(none)"
+                items_str = "(None)"
             else:
                 shown = loc.items[:3]
-                items_str = ", ".join(shown)
+                items_str = ", ".join(shown).capitalize()
                 if len(loc.items) > 3:
                     items_str += ", ..."
             screen.blit(body_font.render(items_str, True, TEXT), (items_rect.x + 18, items_rect.y + 32))
@@ -1002,6 +1181,13 @@ class GameUI:
 
             pygame.display.flip()
 
+            if not self.game.ongoing:
+                if (self.game.score >= self.game.MIN_SCORE and "lucky mug" in self.game.returned and
+                        "usb drive" in self.game.returned and "laptop charger" in self.game.returned):
+                    self.win()
+
+                else:
+                    self.lose()
         pygame.quit()
 
 
