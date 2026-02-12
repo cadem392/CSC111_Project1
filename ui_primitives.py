@@ -283,8 +283,7 @@ class ModalPicker:
         """Close the modal."""
         self.is_open = False
 
-    @staticmethod
-    def _panel_rect(screen_rect: pygame.Rect) -> pygame.Rect:
+    def _panel_rect(self, screen_rect: pygame.Rect) -> pygame.Rect:
         """Return the centered panel rectangle."""
         width = min(560, screen_rect.width - 160)
         height = min(520, screen_rect.height - 160)
@@ -292,8 +291,7 @@ class ModalPicker:
         y = screen_rect.centery - height // 2
         return pygame.Rect(x, y, width, height)
 
-    @staticmethod
-    def _list_rect(panel: pygame.Rect) -> pygame.Rect:
+    def _list_rect(self, panel: pygame.Rect) -> pygame.Rect:
         """Return the inner list rectangle for option rows."""
         padding = 18
         title_height = 54
@@ -305,8 +303,7 @@ class ModalPicker:
             panel.height - title_height - bottom_height
         )
 
-    @staticmethod
-    def _cancel_rect(panel: pygame.Rect) -> pygame.Rect:
+    def _cancel_rect(self, panel: pygame.Rect) -> pygame.Rect:
         """Return the cancel button rectangle."""
         return pygame.Rect(panel.x + 18, panel.y + panel.height - 44, 120, 32)
 
@@ -490,8 +487,7 @@ class MiniMap:
             used.add((spill_x, spill_y))
             spill_y += 1
 
-    @staticmethod
-    def _draw_direction_labels(surface: pygame.Surface, rect: pygame.Rect) -> None:
+    def _draw_direction_labels(self, surface: pygame.Surface, rect: pygame.Rect) -> None:
         """Draw N/E/S/W guides around a minimap card."""
         label_font = pygame.font.SysFont("arial", 14, bold=True)
         north = label_font.render("N", True, TEXT_DIM)

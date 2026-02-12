@@ -22,7 +22,7 @@
         "go west": 3
       },
       "items": [
-        "student card",
+        "tcard",
         "cookie"
       ]
     },
@@ -129,7 +129,7 @@
       "items": [
         "sticky notes"
       ],
-      "restrictions": "student card"
+      "restrictions": "tcard"
     },
     {
       "id": 11,
@@ -145,7 +145,7 @@
       "items": [
         "study timer"
       ],
-      "restrictions": "student card"
+      "restrictions": "tcard"
     },
     {
       "id": 12,
@@ -159,7 +159,7 @@
         "usb drive",
         "library book"
       ],
-      "restrictions": "student card"
+      "restrictions": "tcard"
     },
     {
       "id": 13,
@@ -482,7 +482,7 @@
       "target_points": 30
     },
     {
-      "name": "student card",
+      "name": "tcard",
       "description": "Your UofT student card. You feel naked without it.",
       "hint": "It belongs with your keys and your laptop, your big three.",
       "completion_text": "You slide the card onto your desk, finally found your TCard.",
