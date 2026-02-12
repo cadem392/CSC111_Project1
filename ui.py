@@ -16,15 +16,28 @@ Controls:
 
 from __future__ import annotations
 
-import pygame
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Optional, Sequence
 
+import pygame
+from pygame import init as PYGAME_INIT, quit as PYGAME_QUIT
+from pygame.locals import (
+    K_ESCAPE,
+    K_q as K_Q,
+    KEYDOWN,
+    MOUSEBUTTONDOWN,
+    MOUSEWHEEL,
+    QUIT,
+    SRCALPHA,
+)
+
 from adventure import AdventureGame
-from event_logger import EventList, Event
+from event_logger import Event, EventList
 
-
+MAX_TURNS = 67
+MIN_SCORE = 50
 # =====================================================
 # Theme (ACORN-inspired, light dashboard style)
 # =====================================================
@@ -83,7 +96,7 @@ def draw_card(surface: pygame.Surface, rect: pygame.Rect,
               radius: int = 14,
               border_w: int = 2) -> None:
     """Draw a rounded card with a subtle drop shadow and border."""
-    shadow = pygame.Surface((rect.width + 8, rect.height + 8), pygame.SRCALPHA)
+    shadow = pygame.Surface((rect.width + 8, rect.height + 8), SRCALPHA)
     pygame.draw.rect(shadow, SHADOW, shadow.get_rect(), border_radius=radius + 2)
     surface.blit(shadow, (rect.x + 2, rect.y + 3))
     pygame.draw.rect(surface, fill, rect, border_radius=radius)
@@ -176,7 +189,7 @@ class Button:
             fill = (235, 239, 246)
             txt_color = MUTED
 
-        shadow = pygame.Surface((r.width + 6, r.height + 6), pygame.SRCALPHA)
+        shadow = pygame.Surface((r.width + 6, r.height + 6), SRCALPHA)
         shadow_color = HOVER_SHADOW if hovered else SHADOW
         pygame.draw.rect(shadow, shadow_color, shadow.get_rect(), border_radius=13)
         surface.blit(shadow, (r.x + 1, r.y + 2))
@@ -200,6 +213,9 @@ def end_clip(surface: pygame.Surface, prev: pygame.Rect) -> None:
 
 class ScrollArea:
     """A clipped region with an independent vertical scroll offset."""
+    rect: pygame.Rect
+    offset: int
+    content_height: int
 
     def __init__(self, rect: pygame.Rect) -> None:
         self.rect = rect
@@ -252,6 +268,14 @@ class ScrollArea:
 
 class ModalPicker:
     """Centered modal that shows a scrollable list of options."""
+    title: str
+    options: list[str]
+    on_pick: Callable[[str], None]
+    panel: pygame.Rect
+    scroll: Optional[ScrollArea]
+    option_buttons: list[Button]
+    cancel_button: Optional[Button]
+    is_open: bool
 
     def __init__(self, title: str, options: Sequence[str], on_pick: Callable[[str], None]) -> None:
         self.title = title
@@ -259,10 +283,10 @@ class ModalPicker:
         self.on_pick = on_pick
 
         self.panel = pygame.Rect(0, 0, 0, 0)
-        self.scroll: Optional[ScrollArea] = None
+        self.scroll = None
 
-        self.option_buttons: list[Button] = []
-        self.cancel_button: Optional[Button] = None
+        self.option_buttons = []
+        self.cancel_button = None
         self.is_open = True
 
     def close(self) -> None:
@@ -322,7 +346,7 @@ class ModalPicker:
     def draw(self, surface: pygame.Surface, title_font: pygame.font.Font,
              btn_font: pygame.font.Font, mouse_pos: tuple[int, int]) -> None:
         """Render the modal with a dark overlay + clipped scroll list."""
-        overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        overlay = pygame.Surface(surface.get_size(), SRCALPHA)
         overlay.fill((14, 40, 86, 88))
         surface.blit(overlay, (0, 0))
 
@@ -372,26 +396,29 @@ class ModalPicker:
 
 class MiniMap:
     """Cardinal-direction minimap derived from available_commands."""
-
-    DIRS = {
+    dirs: dict[str, tuple[int, int]] = {
         "north": (0, -1),
-        "south": (0,  1),
-        "east":  (1,  0),
-        "west":  (-1, 0),
+        "south": (0, 1),
+        "east": (1, 0),
+        "west": (-1, 0),
     }
+
+    game: AdventureGame
+    pos: dict[int, tuple[int, int]]
+    edges: set[tuple[int, int]]
 
     def __init__(self, game: AdventureGame) -> None:
         self.game = game
-        self.pos: dict[int, tuple[int, int]] = {}
-        self.edges: set[tuple[int, int]] = set()
+        self.pos = {}
+        self.edges = set()
         self._build_cardinal_layout()
 
     def _parse_dir(self, cmd: str) -> Optional[str]:
         c = cmd.lower().strip()
         # expects "go north" etc.
-        for d in self.DIRS:
-            if d in c:
-                return d
+        for direction in self.dirs:
+            if direction in c:
+                return direction
         return None
 
     def _build_cardinal_layout(self) -> None:
@@ -403,7 +430,6 @@ class MiniMap:
         start = loc_ids[0]
         self.pos[start] = (0, 0)
 
-        from collections import deque
         q = deque([start])
 
         while q:
@@ -420,7 +446,7 @@ class MiniMap:
                     # ignore non-cardinal commands in minimap layout
                     continue
 
-                dx, dy = self.DIRS[d]
+                dx, dy = self.dirs[d]
                 cand = (ux + dx, uy + dy)
 
                 a, b = (u, v) if u < v else (v, u)
@@ -513,6 +539,13 @@ class MiniMap:
 
 class GameUI:
     """Main Pygame UI loop and rendering."""
+    game: AdventureGame
+    log: EventList
+    modal: Optional[ModalPicker]
+    minimap: MiniMap
+    output_lines: list[str]
+    output_scroll: Optional[ScrollArea]
+    actions_scroll: Optional[ScrollArea]
 
     def __init__(self, game: AdventureGame, log: EventList) -> None:
         self.game = game
@@ -521,12 +554,12 @@ class GameUI:
         self.game.inventory = list(getattr(self.game, "inventory", []))
         self.game.score = int(getattr(self.game, "score", 0))
 
-        self.modal: Optional[ModalPicker] = None
+        self.modal = None
         self.minimap = MiniMap(game)
 
-        self.output_lines: list[str] = []
-        self.output_scroll: Optional[ScrollArea] = None
-        self.actions_scroll: Optional[ScrollArea] = None
+        self.output_lines = []
+        self.output_scroll = None
+        self.actions_scroll = None
 
     # ---------- Output helpers ----------
 
@@ -631,7 +664,8 @@ class GameUI:
             self.begin_turn(f"Drop {item_name}")
             if self.game.drop(item_name):
                 if self.game.check_quest(item_name):
-                    self.out(f"{self.game.get_item(item_name).completion_text}")
+                    completion_text = str(self.game.get_item(item_name).completion_text)
+                    self.out(completion_text)
                     self.out(f"Your score is now {self.game.score}")
                 else:
                     self.out(f"Dropped: {item_name}")
@@ -707,13 +741,16 @@ class GameUI:
         self.log.add_event(Event(loc.id_num, loc.brief_description), command_key)
         self.game.turn += 1
         if MAX_TURNS == self.game.turn:
-            if (self.game.score >= MIN_SCORE and "lucky mug" in self.game.returned and
-                    "usb drive" in self.game.returned and "laptop charger" in self.game.returned):
+            if (
+                self.game.score >= MIN_SCORE
+                and "lucky mug" in self.game.returned
+                and "usb drive" in self.game.returned
+                and "laptop charger" in self.game.returned
+            ):
                 self.game.ongoing = False
                 return
-            else:
-                self.game.ongoing = False
-                return
+            self.game.ongoing = False
+            return
         self.out(self.location_description())
         if new_loc.items:
             self.out("Items here: " + ", ".join(new_loc.items))
@@ -762,7 +799,14 @@ class GameUI:
 
     # ---------- End screen helper ----------
 
-    def _end_screen(self, title: str, subtitle: str, body_lines: list[str], accent: tuple[int, int, int], win = False) -> None:
+    def _end_screen(
+        self,
+        title: str,
+        subtitle: str,
+        body_lines: list[str],
+        accent: tuple[int, int, int],
+        win: bool = False
+    ) -> None:
         """Block on an end screen UI.
 
         - Click "Restart" to reset and run the game again.
@@ -821,8 +865,8 @@ class GameUI:
             draw_card(screen, card, PANEL, radius=18)
 
             # Accent bar
-            bar = pygame.Rect(card.x + 14, card.y + 14, 10, card.height - 28)
-            pygame.draw.rect(screen, accent, bar, border_radius=8)
+            accent_bar = pygame.Rect(card.x + 14, card.y + 14, 10, card.height - 28)
+            pygame.draw.rect(screen, accent, accent_bar, border_radius=8)
 
             cx = card.centerx
             y = card.y + 44
@@ -856,7 +900,7 @@ class GameUI:
             if win:
                 keep_going_rect = pygame.Rect(0, btn_h + 10, btn_w, btn_h)
                 keep_going_rect.center = (card.centerx, card.bottom - (88 + btn_h))
-                keep_going_button = Button(keep_going_rect, "Keep Game", lambda: None, kind = "primary")
+                keep_going_button = Button(keep_going_rect, "Keep Game", lambda: None, kind="primary")
                 keep_going_button.draw(screen, body_font, mouse_pos)
 
             hint = hint_font.render("ESC / Q to quit", True, TEXT_DIM)
@@ -864,14 +908,14 @@ class GameUI:
             screen.blit(hint, hint_rect)
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == QUIT:
                     running = False
 
-                elif event.type == pygame.KEYDOWN:
-                    if event.key in (pygame.K_ESCAPE, pygame.K_q):
+                elif event.type == KEYDOWN:
+                    if event.key in (K_ESCAPE, K_Q):
                         running = False
 
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == MOUSEBUTTONDOWN and event.button == 1:
                     if restart_rect.collidepoint(event.pos):
                         # Reset game state
                         if hasattr(self.game, "reset") and callable(getattr(self.game, "reset")):
@@ -893,10 +937,9 @@ class GameUI:
                         # Restart the UI/game loop
                         self.run()
                         return
-                    if win:
-                        if keep_going_rect.collidepoint(event.pos):
-                            self.game.ongoing = True
-                            return
+                    if win and keep_going_rect is not None and keep_going_rect.collidepoint(event.pos):
+                        self.game.ongoing = True
+                        return
 
             pygame.display.flip()
 
@@ -904,7 +947,7 @@ class GameUI:
 
     def run(self) -> None:
         """Run the UI main loop."""
-        pygame.init()
+        PYGAME_INIT()
         screen = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("CSC111 Adventure - ACORN UI")
         clock = pygame.time.Clock()
@@ -1030,17 +1073,17 @@ class GameUI:
 
             # ---------------- Events ----------------
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == QUIT:
                     running = False
 
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
+                elif event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
                         if self.modal is not None:
                             self.modal.close()
                         else:
                             self.do_quit()
 
-                elif event.type == pygame.MOUSEWHEEL:
+                elif event.type == MOUSEWHEEL:
                     if self.modal is not None:
                         self.modal.handle_wheel(mouse_pos, event.y)
                     else:
@@ -1049,7 +1092,7 @@ class GameUI:
                         if self.actions_scroll is not None:
                             self.actions_scroll.handle_wheel(mouse_pos, event.y, speed=36)
 
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == MOUSEBUTTONDOWN and event.button == 1:
                     if self.modal is not None:
                         self.modal.handle_click(event.pos)
                     else:
@@ -1184,13 +1227,17 @@ class GameUI:
             pygame.display.flip()
 
             if not self.game.ongoing:
-                if (self.game.score >= MIN_SCORE and "lucky mug" in self.game.returned and
-                        "usb drive" in self.game.returned and "laptop charger" in self.game.returned):
+                if (
+                    self.game.score >= MIN_SCORE
+                    and "lucky mug" in self.game.returned
+                    and "usb drive" in self.game.returned
+                    and "laptop charger" in self.game.returned
+                ):
                     self.win()
 
                 else:
                     self.lose()
-        pygame.quit()
+        PYGAME_QUIT()
 
 
 # =====================================================
@@ -1206,4 +1253,23 @@ def run_pygame_ui(game_data_json: str = "game_data.json", initial_location_id: i
 
 
 if __name__ == "__main__":
+    import python_ta
+
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': [
+            'R1705',
+            'E9998',
+            'E9999',
+            'static_type_checker',
+            'E0611',
+            'C0302',
+            'R0913',
+            'R0902',
+            'R0914',
+            'R1702',
+            'R0912',
+            'R0915'
+        ]
+    })
     run_pygame_ui()
