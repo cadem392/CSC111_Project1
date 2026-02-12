@@ -3,7 +3,7 @@
     {
       "id": 1,
       "name": "Dorm Room",
-      "brief_description": "LOCATION 1\nYour dorm room. Messy desk. Clock ticking.",
+      "brief_description": "LOCATION 1\nYour dorm room. Messy desk. Clock ticking. You need to submit you assignment!!",
       "long_description": "LOCATION 1\nYou’re in your dorm room—the one place that still feels safe. The desk is a landfill of\nprintouts, crumbs, and scribbled pseudocode. Your editor is open, PythonTA errors lurking like\nlandmines. This is the drop-off point: bring the missing essentials here before the deadline.\n\nExits: south (to King's College Road), west (to Dorm Hallway).",
       "available_commands": {
         "go south": 9,
@@ -15,7 +15,7 @@
     {
       "id": 2,
       "name": "Dorm Hallway",
-      "brief_description": "LOCATION 2\nA quiet hallway outside your room.",
+      "brief_description": "LOCATION 2\nA quiet hallway outside your room, the entrance to your humble abode.",
       "long_description": "LOCATION 2\nThe dorm hallway is dim and oddly still, like everyone vanished mid-semester. A vending\nmachine hums with the confidence of a corporate villain. Someone left a few flyers on the floor,\ntrampled and unread.\n\nExits: east (back to Dorm Room), west (to Residence Lobby).",
       "available_commands": {
         "go east": 1,
@@ -29,8 +29,8 @@
     {
       "id": 3,
       "name": "Residence Lobby",
-      "brief_description": "LOCATION 3\nThe residence lobby warm lights, cold air outside.",
-      "long_description": "LOCATION 3\nThe lobby smells faintly like microwaved noodles and winter coats. A front desk sits empty,\nwith a little bell that feels illegal to ring. Through the glass you can see campus paths stretching\nout like a maze.\n\nExits: east (to Dorm Hallway), west (toward Convocation Hall), north (to Hart House Circle).",
+      "brief_description": "LOCATION 3\nThe residence lobby shines with warm light, the air outside freezing.",
+      "long_description": "LOCATION 3\nThe lobby smells faintly like microwaved noodles and winter coats. A front desk sits empty,\nwith a little bell that feels illegal to ring. Through the glass you can see campus paths where\nevery day students get lost in a labrynth of paths.\n\nExits: east (to Dorm Hallway), west (toward Convocation Hall), north (to Hart House Circle).",
       "available_commands": {
         "go east": 2,
         "go west": 4,
@@ -45,7 +45,7 @@
       "id": 4,
       "name": "Front Campus Path",
       "brief_description": "LOCATION 4\nA wide stone path across front campus.",
-      "long_description": "LOCATION 4\nFront Campus is open and winter-bright, the kind of cold that makes your thoughts sharper and\nyour fingers slower. Your shoes scrape over stone. Somewhere nearby, a door slams and echoes.\n\nExits: east (toward Residence Lobby), west (to Convocation Steps).",
+      "long_description": "LOCATION 4\nFront Campus is open and the snow in the park blids you, the cold makes your fingers slower\nand nose numb. Your shoes scrape over stone. Somewhere nearby, a door slams and echoes.\n\nExits: east (toward Residence Lobby), west (to Convocation Steps).",
       "available_commands": {
         "go east": 3,
         "go west": 5
@@ -58,7 +58,7 @@
       "id": 5,
       "name": "Convocation Steps",
       "brief_description": "LOCATION 5\nQuiet steps outside Convocation Hall.",
-      "long_description": "LOCATION 5\nThe steps outside Convocation Hall are empty—no tours, no photos, no chaos. Just you, a big\nstone building, and the feeling that you’re forgetting something important. Wind funnels through\nthe space like it’s trying to hurry you.\n\nExits: east (back to Front Campus Path).",
+      "long_description": "LOCATION 5\nThe steps outside Convocation Hall are empty, no tours, no photos, no chaos. Just you, a big\nstone building, and the feeling that you’re forgetting something important. Wind funnels through\nthe space like it’s trying to hurry you.\n\nExits: east (back to Front Campus Path).",
       "available_commands": {
         "go east": 4
       },
@@ -70,7 +70,7 @@
       "id": 6,
       "name": "Hart House Circle",
       "brief_description": "LOCATION 6\nA calm circle near Hart House.",
-      "long_description": "LOCATION 6\nHart House sits like a stone promise—quiet, serious, and slightly intimidating. A few footprints\ncut across the snow like someone sprinted through with purpose. This spot feels like a junction,\na place where routes split and decisions matter.\n\nExits: north (to St. George Street Gate), south (to Residence Lobby hallway-path).",
+      "long_description": "LOCATION 6\nHart House sits like a stone promise quiet, serious, and slightly intimidating. A few footprints\ncut across the snow like someone sprinted through with purpose. This spot feels like a junction,\na place where routes split and decisions matter.\n\nExits: north (to St. George Street Gate), south (to Residence Lobby hallway-path).",
       "available_commands": {
         "go north": 7,
         "go south": 3
@@ -121,7 +121,7 @@
       "id": 10,
       "name": "Robarts Plaza",
       "brief_description": "LOCATION 10\nRobarts ahead—concrete and confidence.",
-      "long_description": "LOCATION 10\nRobarts rises in front of you like a brutalist spaceship. Students slip in and out like it’s a portal.\nYou can almost feel the weight of deadlines in the air.\n\nExits: west (to King's College Road), east (to Robarts Entrance).",
+      "long_description": "LOCATION 10\nRobarts rises in front of you like a brutalist spaceship. Students slip in and out like it’s a portal.\nYou can almost feel the weight of deadlines in the air. This is you second home\n\nExits: west (to King's College Road), east (to Robarts Entrance).",
       "available_commands": {
         "go west": 9,
         "go east": 11
@@ -151,7 +151,7 @@
       "id": 12,
       "name": "Robarts Quiet Study",
       "brief_description": "LOCATION 12\nSilent study—every sound feels illegal.",
-      "long_description": "LOCATION 12\nIt’s so quiet you can hear your own thoughts compiling. A student nearby has three monitors\nand the calm of someone who definitely backed up their files.\n\nExits: west (to Robarts Entrance).",
+      "long_description": "LOCATION 12\nIt’s so quiet you can hear your own thoughts. A student nearby has three monitors,\n the calm of someone who definitely backed up their files and a slightly crazed look in their eye.\n\nExits: west (to Robarts Entrance).",
       "available_commands": {
         "go west": 11
       },
@@ -178,7 +178,7 @@
       "id": 14,
       "name": "Sid Smith Lobby",
       "brief_description": "LOCATION 14\nOpen lobby; stairs and echoes.",
-      "long_description": "LOCATION 14\nThe lobby is brighter than the hallways, with echoes that make every footstep dramatic.\nThere’s a screen showing upcoming talks you don’t have time for.\n\nExits: south (to Sid Smith Hallway), east (to Philosopher's Walk North), north (to Professor's Office).",
+      "long_description": "LOCATION 14\nThe lobby is brighter than the hallways, with echoes that make every footstep dramatic.\nThere’s a screen showing upcoming talks you don’t have time for, you need to focus.\n\nExits: south (to Sid Smith Hallway), east (to Philosopher's Walk North), north (to Professor's Office).",
       "available_commands": {
         "go south": 13,
         "go east": 16,
@@ -192,7 +192,7 @@
       "id": 15,
       "name": "Museum Lawn",
       "brief_description": "LOCATION 15\nA cold open lawn near the museum.",
-      "long_description": "LOCATION 15\nThe museum lawn is wide and exposed. The city feels close here, like campus is just borrowing\na corner of Toronto for a while. Your breath fogs up your vision for a second—then clears.\n\nExits: south (to Philosopher's Walk North).",
+      "long_description": "LOCATION 15\nThe museum lawn is wide and exposed. The city feels close here, like campus is just borrowing\na corner of Toronto for a while. Your breath freezes mid air and you remember your mission.\n\nExits: south (to Philosopher's Walk North).",
       "available_commands": {
         "go south": 16
       },
@@ -219,7 +219,7 @@
       "id": 17,
       "name": "Varsity Gate",
       "brief_description": "LOCATION 17\nA gate near Varsity fields—windy and open.",
-      "long_description": "LOCATION 17\nThe Varsity gate opens onto open space. The wind hits harder here. The field looks empty,\nlike it’s waiting for a game that never starts.\n\nExits: west (to Philosopher's Walk North), south (to Bahen Side Entrance).",
+      "long_description": "LOCATION 17\nThe Varsity gate opens onto open space. The wind bites your face here. The field looks empty,\nlike it’s waiting for a game that never starts.\n\nExits: west (to Philosopher's Walk North), south (to Bahen Side Entrance).",
       "available_commands": {
         "go west": 16,
         "go south": 18
@@ -231,8 +231,8 @@
     {
       "id": 18,
       "name": "Bahen Side Entrance",
-      "brief_description": "LOCATION 18\nBahen nearby—glass, light, and late-night energy.",
-      "long_description": "LOCATION 18\nEven from the side, Bahen glows. You can almost hear keyboards and quiet despair behind the\nglass. Someone taped a meme to the doorframe. It’s old, but still accurate.\n\nExits: north (to Varsity Gate), east (to Bahen Main Doors).",
+      "brief_description": "LOCATION 18\nBahen is nearby, a monolith of glass, light, and scientific energy.",
+      "long_description": "LOCATION 18\nEven from the side, Bahen glows. You can almost hear keyboards and quiet despair behind the\nglass. 3D printers whiffing in the window and construction through the walls.\n\nExits: north (to Varsity Gate), east (to Bahen Main Doors).",
       "available_commands": {
         "go north": 17,
         "go east": 19
@@ -272,7 +272,7 @@
       "id": 21,
       "name": "Bahen 2F Labs",
       "brief_description": "LOCATION 21\nLab machines and the glow of monitors.",
-      "long_description": "LOCATION 21\nRows of lab computers sit like an army. The fans whisper. A whiteboard is filled with half a\nproof and a doodle of a dragon. Classic.\n\nExits: west (to Bahen 1F), south (to Bookstore Back Door).",
+      "long_description": "LOCATION 21\nRows of lab computers sit like an army. The fans whisper. A whiteboard is filled with half a\nproof and a doodle of a dragon, so much for studying.\n\nExits: west (to Bahen 1F), south (to Bookstore Back Door).",
       "available_commands": {
         "go west": 20,
         "go south": 25
@@ -311,7 +311,7 @@
       "id": 24,
       "name": "Gerstein Entrance",
       "brief_description": "LOCATION 24\nQuiet library doors and medical posters.",
-      "long_description": "LOCATION 24\nGerstein’s entrance is calmer than you expect. Posters for health workshops line the walls.\nInside, you can see students who look like they’ve been awake since 2019.\n\nExits: east (to Gerstein Lane).",
+      "long_description": "LOCATION 24\nGerstein’s entrance is calmer than you expect. Posters for health workshops line the walls.\nInside, you can see students who look like they’ve been awake since 2019, perfect for studying.\n\nExits: east (to Gerstein Lane).",
       "available_commands": {
         "go east": 23
       },
@@ -322,7 +322,7 @@
       "id": 25,
       "name": "Bookstore Back Door",
       "brief_description": "LOCATION 25\nBack entrance—deliveries and stacked boxes.",
-      "long_description": "LOCATION 25\nBehind the bookstore, boxes are stacked like a poorly balanced Jenga tower. A receipt printer\nchirps somewhere inside. If you needed paper, pens, or a miracle—this is where you’d find it.\n\nExits: north (to Bahen 2F Labs).",
+      "long_description": "LOCATION 25\nBehind the bookstore, boxes are stacked like a poorly balanced Jenga tower. A receipt printer\nchirps somewhere inside. If you needed paper, pens, or a miracle this is where you’d find it.\n\nExits: north (to Bahen 2F Labs).",
       "available_commands": {
         "go north": 21
       },
@@ -335,7 +335,7 @@
       "id": 26,
       "name": "St. Mike's Alley",
       "brief_description": "LOCATION 26\nA tucked-away alley, quiet and cold.",
-      "long_description": "LOCATION 26\nThis alley is the kind of place you never notice until you’re late and desperate. Snow piles up\nin corners. Your footsteps sound too loud.\n\nExits: north (to College Street Corner), east (to Cafe Alley).",
+      "long_description": "LOCATION 26\nThis alley is the kind of place you never notice until you’re late and desperate. Snow piles up\nin corners. Your footsteps sound too loud here even though no one is there to hear.\n\nExits: north (to College Street Corner), east (to Cafe Alley).",
       "available_commands": {
         "go north": 22,
         "go east": 27
@@ -346,7 +346,7 @@
       "id": 27,
       "name": "Cafe Alley",
       "brief_description": "LOCATION 27\nSmell of coffee leaking through a side door.",
-      "long_description": "LOCATION 27\nThe smell is unfairly good. A side door is propped open with a wedge, and warm air spills out\nlike a trap designed to steal your time.\n\nExits: west (to St. Mike's Alley), east (to Student Commons).",
+      "long_description": "LOCATION 27\nThe smell is unfairly good. A side door is propped open with a wedge, and warm air spills out\nlike a trap designed to steal your time, they know what they are doing.\n\nExits: west (to St. Mike's Alley), east (to Student Commons).",
       "available_commands": {
         "go west": 26,
         "go east": 28
@@ -360,7 +360,7 @@
       "id": 28,
       "name": "Student Commons",
       "brief_description": "LOCATION 28\nCouches, chatter, and exhausted faces.",
-      "long_description": "LOCATION 28\nPeople are slumped on couches like they’ve been defeated by midterms. Someone laughs too\nloudly. Someone else stares into their laptop like it’s a portal.\n\nExits: west (to Cafe Alley), east (to Help Desk Nook), south (to Lost & Found Counter).",
+      "long_description": "LOCATION 28\nPeople are slumped on couches like they’ve been defeated by midterms. Someone laughs too\nloudly. Someone else stares into their laptop like it’s a portal, another stares into space.\n\nExits: west (to Cafe Alley), east (to Help Desk Nook), south (to Lost & Found Counter).",
       "available_commands": {
         "go west": 27,
         "go east": 30,
@@ -376,7 +376,7 @@
       "id": 29,
       "name": "Print Lab",
       "brief_description": "LOCATION 29\nPrinters, paper trays, and toner smell.",
-      "long_description": "LOCATION 29\nThe print lab feels like a production line for deadlines. A printer jams, someone sighs, and the\nworld continues. A label maker sits on a table like it has authority.\n\nExits: west (to Help Desk Nook), north (to Underground Tunnel).",
+      "long_description": "LOCATION 29\nThe print lab feels like a production line for deadlines. A printer jams, someone sighs, and the\nworld continues. A label maker sits on a table like it has authority, an accountant's dream.\n\nExits: west (to Help Desk Nook), north (to Underground Tunnel).",
       "available_commands": {
         "go west": 30,
         "go north": 31
@@ -391,7 +391,7 @@
       "id": 30,
       "name": "Help Desk Nook",
       "brief_description": "LOCATION 30\nA tiny counter, a bell, and too many forms.",
-      "long_description": "LOCATION 30\nA tiny help desk nook with a bell you definitely shouldn’t ring. A stack of forms sits neatly,\nlike paperwork is a hobby. Someone left a calculator here—probably by accident, probably not.\n\nExits: west (to Student Commons), east (to Print Lab).",
+      "long_description": "LOCATION 30\nA tiny help desk nook with a bell you definitely shouldn’t ring. A stack of forms sits neatly,\nlike paperwork is a hobby. Someone left a calculator here, maybe by accident, probably not.\n\nExits: west (to Student Commons), east (to Print Lab).",
       "available_commands": {
         "go west": 28,
         "go east": 29
@@ -405,7 +405,7 @@
       "id": 31,
       "name": "Underground Tunnel",
       "brief_description": "LOCATION 31\nA narrow underground tunnel beneath campus.",
-      "long_description": "LOCATION 31\nThe tunnel is low and concrete-lined, lit by flickering fluorescent lights that hum just loudly\nenough to be unsettling. Old pipes run along the ceiling, wrapped in peeling insulation. This\nfeels like infrastructure students were never meant to see—just a forgotten artery beneath\ncampus, connecting places without asking permission.\n\nExits: north (to Robarts Entrance), south (to Print Lab).",
+      "long_description": "LOCATION 31\nThe tunnel is low and concrete-lined, lit by flickering fluorescent lights that hum just loudly\nenough to be unsettling. Old pipes run along the ceiling, wrapped in peeling insulation. This\nfeels like infrastructure students were never meant to see just a forgotten artery beneath\ncampus, connecting places without asking permission.\n\nExits: north (to Robarts Entrance), south (to Print Lab).",
       "available_commands": {
         "go north": 11,
         "go south": 29
@@ -458,7 +458,7 @@
       "name": "usb drive",
       "description": "Your only copy of the project. Losing this is instant tragedy.",
       "hint": "Where you started, where the code lives, where the deadline waits.",
-      "completion_text": "You plug the USB in. The files are there. For the first time today, you breathe.",
+      "completion_text": "You plug the USB in. The files are there. For the first time today, you sigh in relief.",
       "start_position": 12,
       "target_position": 1,
       "target_points": 30
@@ -484,8 +484,8 @@
     {
       "name": "student card",
       "description": "Your UofT student card. You feel naked without it.",
-      "hint": "It belongs with your keys and your laptop—your base reality.",
-      "completion_text": "You slide the card onto your desk. Identity restored.",
+      "hint": "It belongs with your keys and your laptop, your big three.",
+      "completion_text": "You slide the card onto your desk, finally found your TCard.",
       "start_position": 2,
       "target_position": 1,
       "target_points": 2
@@ -494,7 +494,7 @@
       "name": "stapler",
       "description": "A small stapler. Weirdly comforting.",
       "hint": "Paperwork tends to pile up where ink and printers collide.",
-      "completion_text": "You set it beside the printer station. Organization increases by 1.",
+      "completion_text": "You set it beside the printer station silently.",
       "start_position": 29,
       "target_position": 29,
       "target_points": 1
@@ -512,7 +512,7 @@
       "name": "gym pass",
       "description": "A gym pass card. The universe is insisting you do cardio today.",
       "hint": "Its purpose is fulfilled exactly where it was issued.",
-      "completion_text": "You nod at the gym like you’ll be back. Maybe.",
+      "completion_text": "You nod at the gym like you’ll be back. Maybe. Probably not.",
       "start_position": 6,
       "target_position": 6,
       "target_points": 1
@@ -546,8 +546,8 @@
     },
     {
       "name": "sticky notes",
-      "description": "A rainbow stack of reminders: \"FIX TYPES\", \"RUN PYTHONT A\", \"DON'T PANIC\".",
-      "hint": "They stick best where problems get solved out loud.",
+      "description": "A rainbow stack of reminders: \"FIX TYPES\", \"RUN PYTHON TA\", \"DON'T PANIC\".",
+      "hint": "They stick  best where problems getsolved out loud.",
       "completion_text": "You slap them onto the help table. The wall of shame begins.",
       "start_position": 10,
       "target_position": 33,
@@ -557,7 +557,7 @@
       "name": "study timer",
       "description": "A tiny timer. It makes time feel louder.",
       "hint": "Time matters most where silence amplifies it.",
-      "completion_text": "You set it down. Seconds become a resource again.",
+      "completion_text": "You set it down. Just to keep doomscrolling.",
       "start_position": 11,
       "target_position": 12,
       "target_points": 1
