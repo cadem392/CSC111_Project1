@@ -29,6 +29,9 @@ from event_logger import Event, EventList
 
 # Note: You may add helper functions, classes, etc. below as needed
 
+MAX_TURNS = 67
+MIN_SCORE = 70
+
 
 class AdventureGame:
     """A text adventure game class storing all location, item and map data.
@@ -51,10 +54,9 @@ class AdventureGame:
     current_location_id: int  # Suggested attribute, can be removed
     ongoing: bool  # Suggested attribute, can be removed
     inventory: list[Item] = []
+    attributes: set[str] = set()
     score: int = 0
     turn: int = 0
-    MAX_TURNS: int = 67
-    MIN_SCORE: int = 50
     returned: set[str] = set()
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
@@ -93,7 +95,9 @@ class AdventureGame:
         locations = {}
         for loc_data in data['locations']:  # Go through each element associated with the 'locations' key in the file
             location_obj = Location(loc_data['id'], loc_data['name'], loc_data['brief_description'],
-                                    loc_data['long_description'], loc_data['available_commands'], loc_data['items'])
+                                    loc_data['long_description'], loc_data['available_commands'], loc_data['items'],
+                                    loc_data['restrictions'] if 'restrictions' in loc_data else None,
+                                    loc_data['rewards'] if 'rewards' in loc_data else None)
             locations[loc_data['id']] = location_obj
 
         items = []
@@ -177,7 +181,6 @@ class AdventureGame:
         """Submit early to your inventory."""
         self.ongoing = False
 
-
     def reset(self) -> None:
         """Reset all items and locations."""
         self._locations, self._items, self._valid_items = self._load_game_data("game_data.json")
@@ -187,14 +190,6 @@ class AdventureGame:
         self.returned = set()
         self.score = 0
         self.ongoing = True
-
-# TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
-# TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
-
-
-def run_minigame(minigame: str) -> None:
-    """runs different minigames and puzzles."""
-    pass
 
 
 def win() -> bool:
@@ -254,7 +249,7 @@ def run() -> None:
             print("-", action)
 
         # Validate choice
-        print(f"You have {game.MAX_TURNS - game.turn} turns left....")
+        print(f"You have {MAX_TURNS - game.turn} turns left....")
         choice = input("\nEnter action: ").lower().strip()
         while (choice not in location.available_commands and choice not in menu and
                "take" not in choice and "drop" not in choice and "inspect" not in choice):
@@ -335,11 +330,11 @@ def run() -> None:
             result = location.available_commands[choice]
             game.turn += 1
             game.current_location_id = result
-            if game.turn == game.MAX_TURNS:
+            if game.turn == MAX_TURNS:
                 game.ongoing = False
         else:
 
-            if (game.score >= game.MIN_SCORE and "lucky mug" in game.returned and
+            if (game.score >= MIN_SCORE and "lucky mug" in game.returned and
                     "usb drive" in game.returned and "laptop charger" in game.returned):
                 if win():
                     game.ongoing = True
@@ -350,15 +345,14 @@ def run() -> None:
                 game.ongoing = False
 
 
-
 if __name__ == "__main__":
     # When you are ready to check your work with python_ta, uncomment the following lines.
     # (Delete the "#" and space before each line.)
     # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
+    })
 
     run()

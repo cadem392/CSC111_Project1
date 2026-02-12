@@ -29,6 +29,9 @@ from event_logger import EventList, Event
 # Theme (ACORN-inspired, light dashboard style)
 # =====================================================
 
+MAX_TURNS = 67
+MIN_SCORE = 70
+
 UOFT_BLUE = (9, 48, 102)
 UOFT_LIGHT_BLUE = (0, 101, 179)
 UOFT_GOLD = (255, 205, 0)
@@ -703,8 +706,8 @@ class GameUI:
         new_loc = self.game.get_location()
         self.log.add_event(Event(loc.id_num, loc.brief_description), command_key)
         self.game.turn += 1
-        if self.game.MAX_TURNS == self.game.turn:
-            if (self.game.score >= self.game.MIN_SCORE and "lucky mug" in self.game.returned and
+        if MAX_TURNS == self.game.turn:
+            if (self.game.score >= MIN_SCORE and "lucky mug" in self.game.returned and
                     "usb drive" in self.game.returned and "laptop charger" in self.game.returned):
                 self.game.ongoing = False
                 return
@@ -739,8 +742,8 @@ class GameUI:
             if req not in self.game.returned:
                 missing.append(req)
 
-        if self.game.score < self.game.MIN_SCORE:
-            reason = f"Score too low: {self.game.score}/{self.game.MIN_SCORE}."
+        if self.game.score < MIN_SCORE:
+            reason = f"Score too low: {self.game.score}/{MIN_SCORE}."
         elif missing:
             reason = "Missing: " + ", ".join(missing) + "."
         else:
@@ -888,7 +891,6 @@ class GameUI:
                         self.modal = None
 
                         # Restart the UI/game loop
-                        running = False
                         self.run()
                         return
                     if win:
@@ -1090,7 +1092,7 @@ class GameUI:
             header_title = title_font.render(loc.name, True, TEXT)
             screen.blit(header_title, (header_rect.x + 20, header_rect.y + 12))
 
-            turns_left = self.game.MAX_TURNS - self.game.turn
+            turns_left = MAX_TURNS - self.game.turn
             chips_y = header_rect.y + 44
             draw_chip(
                 screen,
@@ -1182,7 +1184,7 @@ class GameUI:
             pygame.display.flip()
 
             if not self.game.ongoing:
-                if (self.game.score >= self.game.MIN_SCORE and "lucky mug" in self.game.returned and
+                if (self.game.score >= MIN_SCORE and "lucky mug" in self.game.returned and
                         "usb drive" in self.game.returned and "laptop charger" in self.game.returned):
                     self.win()
 
