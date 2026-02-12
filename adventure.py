@@ -53,8 +53,8 @@ class AdventureGame:
     inventory: list[Item] = []
     score: int = 0
     turn: int = 0
-    max_turns: int = 67
-    min_score: int = 50
+    MAX_TURNS: int = 67
+    MIN_SCORE: int = 50
     returned: set[str] = set()
 
     def __init__(self, game_data_file: str, initial_location_id: int) -> None:
@@ -158,8 +158,9 @@ class AdventureGame:
         curr_item = self.get_item(item_name)
         if curr_item in self.inventory:
             print(curr_item.hint)
+            print(f"..... It needs to go to {self.get_location(curr_item.target_position).name}")
 
-    def check_quest(self, item_name: str) -> None:
+    def check_quest(self, item_name: str) -> bool:
         """Check if an item is in the target location."""
         curr_item = self.get_item(item_name)
         curr_location = self.get_location()
@@ -169,21 +170,66 @@ class AdventureGame:
             self.score += curr_item.target_points
             print("Your score is now " + str(self.score))
             curr_location.items.remove(item_name)
+            return True
+        return False
+
+    def submit_early(self) -> None:
+        """Submit early to your inventory."""
+        self.ongoing = False
 
 
-if __name__ == "__main__":
-    # When you are ready to check your work with python_ta, uncomment the following lines.
-    # (Delete the "#" and space before each line.)
-    # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
-    # })
+    def reset(self) -> None:
+        """Reset all items and locations."""
+        self._locations, self._items, self._valid_items = self._load_game_data("game_data.json")
+        self.current_location_id = 1  # game begins at this location
+        self.turn = 0
+        self.inventory = []
+        self.returned = set()
+        self.score = 0
+        self.ongoing = True
+
+# TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
+# TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
+
+
+def run_minigame(minigame: str) -> None:
+    """runs different minigames and puzzles."""
+    pass
+
+
+def win() -> bool:
+    """wins the game."""
+    print("YOU WIN!!!!")
+    print("You submitted your assignment on time!")
+    again = ""
+    while not (again == "y" or again == "n"):
+        again = input("Would you like to play again? (y/n) ")
+    if again == "y":
+        run()
+        return False
+
+    return True
+
+
+def lose() -> None:
+    """loses the game."""
+    print("YOU LOSE!!!!")
+    print("You submitted your assignment late!")
+    again = ""
+    while not (again == "y" or again == "n"):
+        again = input("Would you like to play again? (y/n) ")
+    if again == "y":
+        run()
+    return
+
+
+def run() -> None:
+    """runs the game."""
 
     game_log = EventList()  # This is REQUIRED as one of the baseline requirements
     game = AdventureGame('game_data.json', 1)  # load data, setting initial location ID to 1
-    menu = ["look", "inventory", "score", "log", "quit"]  # Regular menu options available at each location
+    menu = ["look", "inventory", "score", "log", "submit early", "quit"]
+    # Regular menu options available at each location
     choice = None
 
     # Note: You may modify the code below as needed; the following starter code is just a suggestion
@@ -208,6 +254,7 @@ if __name__ == "__main__":
             print("-", action)
 
         # Validate choice
+        print(f"You have {game.MAX_TURNS - game.turn} turns left....")
         choice = input("\nEnter action: ").lower().strip()
         while (choice not in location.available_commands and choice not in menu and
                "take" not in choice and "drop" not in choice and "inspect" not in choice):
@@ -217,7 +264,7 @@ if __name__ == "__main__":
         print("========")
         print("You decided to:", choice)
 
-        while choice not in location.available_commands:
+        while choice not in location.available_commands and game.ongoing:
 
             if choice == "log":
                 game_log.display_events()
@@ -265,24 +312,53 @@ if __name__ == "__main__":
                 item = choice.split(maxsplit=1)[1]
                 game.inspect(item)
 
-            choice = input("\nEnter action: ").lower().strip()
-            while (choice not in location.available_commands and choice not in menu and
-                   "take" not in choice and "drop" not in choice and "inspect" not in choice):
-                print("That was an invalid option; try again.")
-                choice = input("\nEnter action: ").lower().strip()
+            elif choice == "quit":
+                game.ongoing = False
+                return
 
-            print("========")
-            print("You decided to:", choice)
+            elif choice == "submit early":
+                game.submit_early()
+
+            if game.ongoing:
+                choice = input("\nEnter action: ").lower().strip()
+                while (choice not in location.available_commands and choice not in menu and
+                       "take" not in choice and "drop" not in choice and "inspect" not in choice):
+                    print("That was an invalid option; try again.")
+                    choice = input("\nEnter action: ").lower().strip()
+
+                print("========")
+                print("You decided to:", choice)
 
         # ENTER YOUR CODE BELOW to handle other menu commands (remember to use helper functions as appropriate)
         # Handle non-menu actions
-        result = location.available_commands[choice]
-        game.current_location_id = result
+        if game.ongoing:
+            result = location.available_commands[choice]
+            game.turn += 1
+            game.current_location_id = result
+            if game.turn == game.MAX_TURNS:
+                game.ongoing = False
+        else:
 
-        # TODO: Add in code to deal with actions which do not change the location (e.g. taking or using an item)
-        # TODO: Add in code to deal with special locations (e.g. puzzles) as needed for your game
+            if (game.score >= game.MIN_SCORE and "lucky mug" in game.returned and
+                    "usb drive" in game.returned and "laptop charger" in game.returned):
+                if win():
+                    game.ongoing = True
+                else:
+                    game.ongoing = False
+            else:
+                lose()
+                game.ongoing = False
 
 
-def run_minigame(minigame: str) -> None:
-    """runs different minigames and puzzles."""
-    pass
+
+if __name__ == "__main__":
+    # When you are ready to check your work with python_ta, uncomment the following lines.
+    # (Delete the "#" and space before each line.)
+    # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
+    # })
+
+    run()
