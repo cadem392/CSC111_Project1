@@ -64,6 +64,8 @@ class AdventureGameSimulation:
         Preconditions:
         - len(commands) > 0
         - all commands in the given list are valid commands when starting from current_location
+          OR are non-movement commands (e.g., "inventory", "score"), which keep the player
+          in the same location for simulation logging purposes.
         """
         # Hint: current_location.available_commands[command] will return the next location ID resulting from executing
         # <command> while in <current_location_id>
@@ -71,9 +73,12 @@ class AdventureGameSimulation:
         curr_location = current_location
 
         for command in commands:
-            next_location_id = curr_location.available_commands[command]
-
-            next_location = self._game.get_location(next_location_id)
+            if command in curr_location.available_commands:
+                next_location_id = curr_location.available_commands[command]
+                next_location = self._game.get_location(next_location_id)
+            else:
+                # Non-movement commands do not change location in this simulator.
+                next_location = curr_location
 
             new_event = Event(next_location.id_num, next_location.brief_description)
 
@@ -121,43 +126,60 @@ if __name__ == "__main__":
     # When you are ready to check your work with python_ta, uncomment the following lines.
     # (Delete the "#" and space before each line.)
     # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
+    })
 
-    # TODO: Modify the code below to provide a walkthrough of commands needed to win and lose the game
-    win_walkthrough = []  # Create a list of all the commands needed to walk through your game to win it
-    expected_log = []  # Update this log list to include the IDs of all locations that would be visited
-    # Uncomment the line below to test your walkthrough
+    # Demo walkthrough for winning and losing states.
+    win_walkthrough = [
+        "go west", "go west", "go west", "go west", "take lucky mug",
+        "go east", "go east", "go east", "go east",
+        "go south", "go east", "go east", "go east", "take usb drive",
+        "go west", "go north", "go north",
+        "go east", "go east", "go south", "go east", "go south", "take laptop charger",
+        "go north", "go west", "go north", "go west", "go west",
+        "go south", "go south", "go west", "go west", "go north",
+        "drop lucky mug", "drop usb drive", "drop laptop charger",
+    ]
+    expected_log = [
+        1, 2, 3, 4, 5, 5,
+        4, 3, 2, 1,
+        9, 10, 11, 12, 12,
+        11, 13, 14,
+        16, 17, 18, 19, 20, 20,
+        19, 18, 17, 16, 14,
+        13, 11, 10, 9, 1, 1, 1, 1
+    ]
     sim = AdventureGameSimulation('game_data.json', 1, win_walkthrough)
     assert expected_log == sim.get_id_log()
 
     # Create a list of all the commands needed to walk through your game to reach a 'game over' state
-    lose_demo = []
-    expected_log = []  # Update this log list to include the IDs of all locations that would be visited
-    # Uncomment the line below to test your demo
+    lose_demo = ["go west", "go east"] * 33 + ["go west"]  # 67 movement commands
+    expected_log = [1] + [2 if i % 2 == 1 else 1 for i in range(1, 67)] + [2]
     sim = AdventureGameSimulation('game_data.json', 1, lose_demo)
     assert expected_log == sim.get_id_log()
 
-    # TODO: Add code below to provide walkthroughs that show off certain features of the game
-    # TODO: Create a list of commands involving visiting locations, picking up items, and then
-    #   checking the inventory, your list must include the "inventory" command at least once
-    # inventory_demo = [..., "inventory", ...]
-    # expected_log = []
-    # sim = AdventureGameSimulation(...)
-    # assert expected_log == sim.get_id_log()
+    # Feature demos: inventory, score, and enhancement behaviors.
+    inventory_demo = ["go west", "inventory", "go east"]
+    expected_log = [1, 2, 2, 1]
+    sim = AdventureGameSimulation('game_data.json', 1, inventory_demo)
+    assert expected_log == sim.get_id_log()
 
-    # scores_demo = [..., "score", ...]
-    # expected_log = []
-    # sim = AdventureGameSimulation(...)
-    # assert expected_log == sim.get_id_log()
+    scores_demo = [
+        "go west", "go west", "go west", "go west",
+        "go east", "go east", "go east", "go east",
+        "score"
+    ]
+    expected_log = [1, 2, 3, 4, 5, 4, 3, 2, 1, 1]
+    sim = AdventureGameSimulation('game_data.json', 1, scores_demo)
+    assert expected_log == sim.get_id_log()
 
     # Add more enhancement_demos if you have more enhancements
-    # enhancement1_demo = [...]
-    # expected_log = []
-    # sim = AdventureGameSimulation(...)
-    # assert expected_log == sim.get_id_log()
+    enhancement1_demo = ["look", "go south", "go east", "log", "go west", "go north"]
+    expected_log = [1, 1, 9, 10, 10, 9, 1]
+    sim = AdventureGameSimulation('game_data.json', 1, enhancement1_demo)
+    assert expected_log == sim.get_id_log()
 
     # Note: You can add more code below for your own testing purposes
