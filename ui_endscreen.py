@@ -55,16 +55,14 @@ class EndScreenView:
         self._lines = []
         self._mouse_pos = (0, 0)
 
-    @staticmethod
-    def _ensure_screen() -> pygame.Surface:
+    def _ensure_screen(self) -> pygame.Surface:
         """Return active display surface, creating one if needed."""
         screen = pygame.display.get_surface()
         if screen is not None:
             return screen
         return pygame.display.set_mode((1280, 720))
 
-    @staticmethod
-    def _create_fonts() -> dict[str, pygame.font.Font]:
+    def _create_fonts(self) -> dict[str, pygame.font.Font]:
         """Create font set used on end screens."""
         pygame.font.init()
         return {
@@ -98,9 +96,8 @@ class EndScreenView:
         lines.append(f"Returned: {returned_str}")
         return lines
 
-    @staticmethod
     def _draw_centered_text(
-        surface: pygame.Surface,
+        self,
         text: str,
         font: pygame.font.Font,
         color: tuple[int, int, int],
@@ -109,7 +106,7 @@ class EndScreenView:
         """Draw centered text and return the text bottom y-coordinate."""
         image = font.render(text, True, color)
         rect = image.get_rect(midtop=x_and_top)
-        surface.blit(image, rect)
+        self._screen.blit(image, rect)
         return rect.bottom
 
     def _draw_body(self, card: pygame.Rect, center_x: int, start_y: int) -> int:
@@ -171,9 +168,8 @@ class EndScreenView:
 
         center_x = card.centerx
         y = card.y + 44
-        y = self._draw_centered_text(self._screen, self._spec.title, self._fonts["title"], TEXT, (center_x, y)) + 10
+        y = self._draw_centered_text(self._spec.title, self._fonts["title"], TEXT, (center_x, y)) + 10
         y = self._draw_centered_text(
-            self._screen,
             self._spec.subtitle,
             self._fonts["subtitle"],
             TEXT_DIM,
@@ -187,8 +183,8 @@ class EndScreenView:
         self._screen.blit(hint, hint.get_rect(midbottom=(card.centerx, card.bottom - 18)))
         return restart_rect, keep_rect
 
-    @staticmethod
     def _click_action(
+        self,
         pos: tuple[int, int],
         restart_rect: pygame.Rect,
         keep_rect: Optional[pygame.Rect],
@@ -213,7 +209,7 @@ class EndScreenView:
                     return action
         return None
 
-    def show(self, spec: EndScreenSpec) -> str:
+    def show(self, spec: EndScreenSpec) -> Optional[str]:
         """Display an end screen and return restart/keep/quit action."""
         self._spec = spec
         self._lines = self._summary_lines(spec)
@@ -228,7 +224,7 @@ class EndScreenView:
             if action is not None:
                 return action
 
-        return "quit"
+        return None
 
 
 if __name__ == "__main__":

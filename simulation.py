@@ -140,15 +140,15 @@ if __name__ == "__main__":
     # When you are ready to check your work with python_ta, uncomment the following lines.
     # (Delete the "#" and space before each line.)
     # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
-    import python_ta
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
-    })
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
+    # })
 
     # Demo walkthrough for winning and losing states.
     win_walkthrough = [
-        "take student card",
+        "take tcard",
         "go west", "take signed extension request", "go west", "take dorm key", "go west", "take lucky mug",
         "go east", "go east", "go east", "go east",
         "go south", "go east", "go east", "go east", "take usb drive",
@@ -177,14 +177,14 @@ if __name__ == "__main__":
     assert expected_log == sim.get_id_log()
 
     # Feature demos: inventory, score, and enhancement behaviors.
-    inventory_demo = ["take student card", "inventory", "go west",
+    inventory_demo = ["take tcard", "inventory", "go west",
                       "take signed extension request", "inventory", "go east"]
     expected_log = [2, 2, 2, 3, 3, 3, 2]
     sim = AdventureGameSimulation('game_data.json', 2, inventory_demo)
     assert expected_log == sim.get_id_log()
 
     scores_demo = [
-        "take student card",
+        "take tcard",
         "go west", "go west", "take dorm key", "go east", "go east", "go east",
         "go south", "go east", "go east", "go east", "take usb drive",
         "go west", "go west", "go west", "go north", "drop usb drive", "score"
@@ -195,12 +195,10 @@ if __name__ == "__main__":
 
     # Add more enhancement_demos if you have more enhancements
     enhancement1_demo = [
-        "take student card", "go west", "take signed extension request", "go west", "take dorm key",
+        "take tcard", "go west", "take signed extension request", "go west", "take dorm key",
         "go east", "go east", "go east", "go south", "go east", "go east",
         "go north", "go north", "go north", "drop signed extension request"
     ]
     expected_log = [2, 2, 3, 3, 4, 4, 3, 2, 1, 9, 10, 11, 13, 14, 32, 32]
     sim = AdventureGameSimulation('game_data.json', 2, enhancement1_demo)
     assert expected_log == sim.get_id_log()
-
-    # Note: You can add more code below for your own testing purposes

@@ -106,8 +106,7 @@ class AdventureGame:
             return self._state.max_turns
         raise AttributeError(f"{type(self).__name__!r} object has no attribute {name!r}")
 
-    @staticmethod
-    def _load_game_data(filename: str) -> tuple[dict[int, Location], list[Item]]:
+    def _load_game_data(self, filename: str) -> tuple[dict[int, Location], list[Item]]:
         """Load locations/items from a JSON file and return game data objects."""
         with open(filename, 'r', encoding='utf-8') as file:
             data = json.load(file)
@@ -203,8 +202,10 @@ class AdventureGame:
         """Return lowercase names of all items currently in inventory."""
         return {item.name.lower() for item in self.inventory}
 
-    @staticmethod
-    def _required_items_from_rules(restrictions: object) -> set[str]:
+    def _required_items_from_rules(
+        self,
+        restrictions: str | list[object] | tuple[object, ...] | set[object] | dict[str, object] | None
+    ) -> set[str]:
         """Extract required item names from a location restriction payload."""
         if restrictions in ({}, None, ""):
             return set()
@@ -255,8 +256,7 @@ class AdventureGame:
             return False, f"You need {missing[0]} to enter {destination.description['name']}."
         return False, f"You need {', '.join(missing)} to enter {destination.description['name']}."
 
-    @staticmethod
-    def _merge_string_mapping(target: dict[str, str], source: object) -> None:
+    def _merge_string_mapping(self, target: dict[str, str], source: dict[str, object] | None) -> None:
         """Merge string-to-string pairs from source into target, lower-casing keys/values."""
         if not isinstance(source, dict):
             return
@@ -265,31 +265,29 @@ class AdventureGame:
             if isinstance(key, str) and isinstance(value, str):
                 target[key.lower()] = value.lower()
 
-    @staticmethod
-    def _extract_item_rewards(rewards_data: object) -> dict[str, str]:
+    def _extract_item_rewards(self, rewards_data: dict[str, object] | None) -> dict[str, str]:
         """Extract item-trade rewards from a location reward payload."""
         rewards: dict[str, str] = {}
         if not isinstance(rewards_data, dict):
             return rewards
 
-        AdventureGame._merge_string_mapping(rewards, rewards_data.get("items"))
+        self._merge_string_mapping(rewards, rewards_data.get("items"))
         nested = rewards_data.get("rewards")
         if isinstance(nested, dict):
-            AdventureGame._merge_string_mapping(rewards, nested.get("items"))
+            self._merge_string_mapping(rewards, nested.get("items"))
 
         return rewards
 
-    @staticmethod
-    def _extract_attribute_rewards(rewards_data: object) -> dict[str, str]:
+    def _extract_attribute_rewards(self, rewards_data: dict[str, object] | None) -> dict[str, str]:
         """Extract attribute-trigger rewards from a location reward payload."""
         rewards: dict[str, str] = {}
         if not isinstance(rewards_data, dict):
             return rewards
 
-        AdventureGame._merge_string_mapping(rewards, rewards_data.get("attributes"))
+        self._merge_string_mapping(rewards, rewards_data.get("attributes"))
         nested = rewards_data.get("rewards")
         if isinstance(nested, dict):
-            AdventureGame._merge_string_mapping(rewards, nested.get("attributes"))
+            self._merge_string_mapping(rewards, nested.get("attributes"))
 
         return rewards
 
@@ -333,7 +331,7 @@ class AdventureGame:
         self,
         location_id: int,
         trigger: str,
-        rewards_data: object,
+        rewards_data: dict[str, object] | None,
         messages: list[str]
     ) -> None:
         """Apply one item-based reward for a trigger at a location, if configured."""
@@ -735,16 +733,16 @@ if __name__ == "__main__":
     # When you are ready to check your work with python_ta, uncomment the following lines.
     # (Delete the "#" and space before each line.)
     # IMPORTANT: keep this code indented inside the "if __name__ == '__main__'" block
-    import python_ta
-
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': [
-            'R1705',
-            'E9998',
-            'E9999',
-            'static_type_checker',
-        ]
-    })
+    # import python_ta
+    #
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': [
+    #         'R1705',
+    #         'E9998',
+    #         'E9999',
+    #         'static_type_checker',
+    #     ]
+    # })
 
     run()

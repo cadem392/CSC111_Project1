@@ -405,8 +405,7 @@ class GameUI:
 
     # ---------- Layout and rendering helpers ----------
 
-    @staticmethod
-    def _create_fonts() -> UIFonts:
+    def _create_fonts(self) -> UIFonts:
         """Create all fonts used in the main UI."""
         return {
             "title": pygame.font.SysFont("segoeui", 26, bold=True),
@@ -419,16 +418,15 @@ class GameUI:
             "logo": pygame.font.SysFont("segoeui", 11, bold=True),
         }
 
-    @staticmethod
-    def _load_logo() -> Optional[pygame.Surface]:
+    def _load_logo(self) -> Optional[pygame.Surface]:
         """Load and scale logo image if available."""
         if not LOGO_FILE.exists():
             return None
         raw_logo = pygame.image.load(str(LOGO_FILE)).convert_alpha()
         return pygame.transform.smoothscale(raw_logo, (62, 62))
 
-    @staticmethod
     def _build_panels(
+        self,
         screen: pygame.Surface,
         pad: int,
         gap: int,
@@ -443,8 +441,8 @@ class GameUI:
         right_panel = pygame.Rect(left_panel.right + gap, panel_y, right_width, panel_height)
         return left_panel, right_panel
 
-    @staticmethod
     def _build_left_cards(
+        self,
         left_panel: pygame.Rect,
         gap: int,
     ) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect, pygame.Rect]:
@@ -456,8 +454,7 @@ class GameUI:
         output_rect = pygame.Rect(left_panel.x, output_top, left_panel.width, left_panel.bottom - output_top)
         return header_rect, desc_rect, items_rect, output_rect
 
-    @staticmethod
-    def _build_right_cards(right_panel: pygame.Rect, gap: int) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect]:
+    def _build_right_cards(self, right_panel: pygame.Rect, gap: int) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect]:
         """Build right panel card rectangles."""
         map_rect = pygame.Rect(right_panel.x, right_panel.y, right_panel.width, 260)
         actions_height = right_panel.height - 260 - gap
@@ -470,15 +467,14 @@ class GameUI:
         )
         return map_rect, actions_card, actions_inner
 
-    @staticmethod
-    def _build_layout(screen: pygame.Surface) -> UILayout:
+    def _build_layout(self, screen: pygame.Surface) -> UILayout:
         """Compute card geometry for the current window size."""
         pad = 20
         gap = 16
         topbar_height = 96
-        left_panel, right_panel = GameUI._build_panels(screen, pad, gap, topbar_height)
-        header_rect, desc_rect, items_rect, output_rect = GameUI._build_left_cards(left_panel, gap)
-        map_rect, actions_card, actions_inner = GameUI._build_right_cards(right_panel, gap)
+        left_panel, right_panel = self._build_panels(screen, pad, gap, topbar_height)
+        header_rect, desc_rect, items_rect, output_rect = self._build_left_cards(left_panel, gap)
+        map_rect, actions_card, actions_inner = self._build_right_cards(right_panel, gap)
 
         return {
             "pad": pad,
@@ -501,17 +497,15 @@ class GameUI:
         else:
             self.actions_scroll.set_rect(actions_inner)
 
-    @staticmethod
     def _append_ghost_button(
+        self,
         buttons: list[Button],
-        area: ActionArea,
-        y: int,
+        rect: pygame.Rect,
         label: str,
         callback: Callable[[], None],
-    ) -> int:
-        """Append one ghost-style full-width action row and return next y."""
-        buttons.append(Button(pygame.Rect(area.x, y, area.width, 34), label, callback, kind="ghost"))
-        return y + 43
+    ) -> None:
+        """Append one ghost-style full-width action row."""
+        buttons.append(Button(rect, label, callback, kind="ghost"))
 
     def _add_inventory_buttons(self, buttons: list[Button], area: ActionArea, y: int) -> int:
         """Add Take/Drop/Inspect section buttons."""
@@ -527,10 +521,14 @@ class GameUI:
 
     def _add_menu_buttons(self, buttons: list[Button], area: ActionArea, y: int) -> int:
         """Add Look/Inventory/Score/Log/Submit/Quit section buttons."""
-        y = self._append_ghost_button(buttons, area, y, "Look", self.do_look)
-        y = self._append_ghost_button(buttons, area, y, "Inventory", self.do_inventory)
-        y = self._append_ghost_button(buttons, area, y, "Score", self.do_score)
-        y = self._append_ghost_button(buttons, area, y, "Log", self.do_log)
+        self._append_ghost_button(buttons, pygame.Rect(area.x, y, area.width, 34), "Look", self.do_look)
+        y += 43
+        self._append_ghost_button(buttons, pygame.Rect(area.x, y, area.width, 34), "Inventory", self.do_inventory)
+        y += 43
+        self._append_ghost_button(buttons, pygame.Rect(area.x, y, area.width, 34), "Score", self.do_score)
+        y += 43
+        self._append_ghost_button(buttons, pygame.Rect(area.x, y, area.width, 34), "Log", self.do_log)
+        y += 43
 
         submit_enabled = self.game.can_submit_early()
         submit_label = "Submit Early" if submit_enabled else "Already Submitted"
@@ -544,11 +542,11 @@ class GameUI:
             )
         )
         y += 43
-        y = self._append_ghost_button(buttons, area, y, "Quit", self.do_quit)
+        self._append_ghost_button(buttons, pygame.Rect(area.x, y, area.width, 34), "Quit", self.do_quit)
+        y += 43
         return y + 7
 
-    @staticmethod
-    def _fixed_direction_positions() -> dict[str, tuple[int, int]]:
+    def _fixed_direction_positions(self) -> dict[str, tuple[int, int]]:
         """Return fixed grid positions for cardinal direction buttons."""
         return {
             "go east": (0, 1),   # top-left
@@ -739,8 +737,7 @@ class GameUI:
             ChipStyle(fill=(255, 247, 233), text_color=(128, 78, 17)),
         )
 
-    @staticmethod
-    def _description_text(location: Location) -> str:
+    def _description_text(self, location: Location) -> str:
         """Return long or brief description based on visited flag."""
         if getattr(location, "visited", False):
             return location.description['brief_description']
@@ -946,15 +943,15 @@ def run_pygame_ui(game_data_json: str = "game_data.json", initial_location_id: i
 
 
 if __name__ == "__main__":
-    import python_ta
-
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': [
-            'R1705',
-            'E9998',
-            'E9999',
-            'static_type_checker',
-        ]
-    })
+    # import python_ta
+    #
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': [
+    #         'R1705',
+    #         'E9998',
+    #         'E9999',
+    #         'static_type_checker',
+    #     ]
+    # })
     run_pygame_ui()
