@@ -9,7 +9,8 @@
         "go south": 9,
         "go west": 2
       },
-      "items": []
+      "items": [],
+      "restrictions": "dorm key"
     },
     {
       "id": 2,
@@ -126,7 +127,8 @@
       },
       "items": [
         "sticky notes"
-      ]
+      ],
+      "restrictions": "student card"
     },
     {
       "id": 11,
@@ -141,7 +143,8 @@
       },
       "items": [
         "study timer"
-      ]
+      ],
+      "restrictions": "student card"
     },
     {
       "id": 12,
@@ -154,7 +157,8 @@
       "items": [
         "usb drive",
         "library book"
-      ]
+      ],
+      "restrictions": "student card"
     },
     {
       "id": 13,
@@ -260,7 +264,6 @@
         "go south": 33
       },
       "items": [
-        "laptop charger",
         "python cheat sheet"
       ]
     },
@@ -310,7 +313,8 @@
       "available_commands": {
         "go east": 23
       },
-      "items": []
+      "items": [],
+      "restrictions": "student card"
     },
     {
       "id": 25,
@@ -345,9 +349,10 @@
         "go west": 26,
         "go east": 28
       },
-      "items": [
-        "coffee"
-      ]
+      "items": [],
+      "rewards": {
+        "items": {"toonie": "coffee"}
+      }
     },
     {
       "id": 28,
@@ -414,7 +419,11 @@
       "available_commands": {
         "go south": 14
       },
-      "items": []
+      "items": [],
+      "rewards": {
+        "attributes": {"signed extension form": "extra time granted"},
+        "items": {"laptop charger":  "lab access form"}
+      }
     },
     {
       "id": 33,
@@ -424,7 +433,13 @@
       "available_commands": {
         "go north": 20
       },
-      "items": []
+      "items": [],
+      "rewards": {
+        "items": [],
+        "rewards": {
+          "items": {"coffee": "lab access form"}
+        }
+      }
     },
     {
       "id": 34,
@@ -452,7 +467,7 @@
       "description": "A familiar charger brick. Your battery is not going to survive without it.",
       "hint": "Power belongs near the desk that refuses to sleep.",
       "completion_text": "The charging light flicks on. Time just became negotiable again.",
-      "start_position": 20,
+      "start_position": 32,
       "target_position": 1,
       "target_points": 20
     },
@@ -731,8 +746,8 @@
       "description": "A form that demands authority.",
       "hint": "Submit it where admin energy thrives.",
       "completion_text": "You drop it off. Bureaucracy appeased.",
-      "start_position": 30,
-      "target_position": 3,
+      "start_position": 33,
+      "target_position": 32,
       "target_points": 2
     },
     {

@@ -42,6 +42,9 @@ MIN_SCORE = 50
 # Theme (ACORN-inspired, light dashboard style)
 # =====================================================
 
+MAX_TURNS = 67
+MIN_SCORE = 70
+
 UOFT_BLUE = (9, 48, 102)
 UOFT_LIGHT_BLUE = (0, 101, 179)
 UOFT_GOLD = (255, 205, 0)
@@ -932,7 +935,6 @@ class GameUI:
                         self.modal = None
 
                         # Restart the UI/game loop
-                        running = False
                         self.run()
                         return
                     if win and keep_going_rect is not None and keep_going_rect.collidepoint(event.pos):

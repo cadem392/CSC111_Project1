@@ -19,6 +19,7 @@ please consult our Course Syllabus.
 This file is Copyright (c) 2026 CSC111 Teaching Team
 """
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -44,6 +45,8 @@ class Location:
     long_description: str
     available_commands: dict[str, int]
     items: list[str]
+    restrictions: Optional[dict[str, int]]
+    rewards: Optional[dict[str, str]]
     visited: bool = False
 
 
