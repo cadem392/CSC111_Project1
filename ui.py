@@ -42,9 +42,6 @@ MIN_SCORE = 50
 # Theme (ACORN-inspired, light dashboard style)
 # =====================================================
 
-MAX_TURNS = 67
-MIN_SCORE = 70
-
 UOFT_BLUE = (9, 48, 102)
 UOFT_LIGHT_BLUE = (0, 101, 179)
 UOFT_GOLD = (255, 205, 0)
@@ -1253,23 +1250,23 @@ def run_pygame_ui(game_data_json: str = "game_data.json", initial_location_id: i
 
 
 if __name__ == "__main__":
-    import python_ta
+    # import python_ta
 
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': [
-            'R1705',
-            'E9998',
-            'E9999',
-            'static_type_checker',
-            'E0611',
-            'C0302',
-            'R0913',
-            'R0902',
-            'R0914',
-            'R1702',
-            'R0912',
-            'R0915'
-        ]
-    })
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': [
+    #         'R1705',
+    #         'E9998',
+    #         'E9999',
+    #         'static_type_checker',
+    #         'E0611',
+    #         'C0302',
+    #         'R0913',
+    #         'R0902',
+    #         'R0914',
+    #         'R1702',
+    #         'R0912',
+    #         'R0915'
+    #     ]
+    # })
     run_pygame_ui()

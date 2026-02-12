@@ -105,7 +105,9 @@ class AdventureGame:
                 loc_data['brief_description'],
                 loc_data['long_description'],
                 loc_data['available_commands'],
-                loc_data['items']
+                loc_data['items'],
+                loc_data['restrictions'] if 'restrictions' in loc_data else {},
+                loc_data['rewards'] if 'rewards' in loc_data else {}
             )
             locations[loc_data['id']] = location_obj
 
