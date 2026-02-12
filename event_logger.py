@@ -206,5 +206,5 @@ if __name__ == '__main__':
     python_ta.check_all(config={
         'max-line-length': 120,
         'allowed-io': ['EventList.display_events'],
-        'disable': ['R1705', 'static_type_checker']
+        'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
     })

@@ -30,10 +30,11 @@
       "id": 3,
       "name": "Residence Lobby",
       "brief_description": "LOCATION 3\nThe residence lobby warm lights, cold air outside.",
-      "long_description": "LOCATION 3\nThe lobby smells faintly like microwaved noodles and winter coats. A front desk sits empty,\nwith a little bell that feels illegal to ring. Through the glass you can see campus paths stretching\nout like a maze.\n\nExits: east (to Dorm Hallway), west (toward Convocation Hall).",
+      "long_description": "LOCATION 3\nThe lobby smells faintly like microwaved noodles and winter coats. A front desk sits empty,\nwith a little bell that feels illegal to ring. Through the glass you can see campus paths stretching\nout like a maze.\n\nExits: east (to Dorm Hallway), west (toward Convocation Hall), north (to Hart House Circle).",
       "available_commands": {
         "go east": 2,
-        "go west": 4
+        "go west": 4,
+        "go north": 6
       },
       "items": [
         "signed extension request",
@@ -276,7 +277,8 @@
         "go west": 20,
         "go south": 25
       },
-      "items": []
+      "items": ["laptop charger"],
+      "restrictions": "lab access form"
     },
     {
       "id": 22,
@@ -284,8 +286,8 @@
       "brief_description": "LOCATION 22\nStreet corner—cars, crosswalks, and rush.",
       "long_description": "LOCATION 22\nThe street corner is loud. You wait for the light and bounce on your heels. Someone’s dropped\na pencil near the curb, like a tiny offering to the semester.\n\nExits: west (to Gerstein Lane), south (to St. Mike's Alley).",
       "available_commands": {
-        "go north": 23,
-        "go east": 26
+        "go west": 23,
+        "go south": 26
       },
       "items": [
         "blue pen"
@@ -297,7 +299,7 @@
       "brief_description": "LOCATION 23\nA narrow lane beside Gerstein.",
       "long_description": "LOCATION 23\nA narrow lane funnels you between buildings. The air smells like cold stone and old books.\nThis feels like a place where lost items end up when nobody’s looking.\n\nExits: east (to College Street Corner), west (to Gerstein Entrance).",
       "available_commands": {
-        "go south": 22,
+        "go east": 22,
         "go west": 24
       },
       "items": [
@@ -335,7 +337,7 @@
       "brief_description": "LOCATION 26\nA tucked-away alley, quiet and cold.",
       "long_description": "LOCATION 26\nThis alley is the kind of place you never notice until you’re late and desperate. Snow piles up\nin corners. Your footsteps sound too loud.\n\nExits: north (to College Street Corner), east (to Cafe Alley).",
       "available_commands": {
-        "go west": 22,
+        "go north": 22,
         "go east": 27
       },
       "items": []
@@ -361,7 +363,7 @@
       "long_description": "LOCATION 28\nPeople are slumped on couches like they’ve been defeated by midterms. Someone laughs too\nloudly. Someone else stares into their laptop like it’s a portal.\n\nExits: west (to Cafe Alley), east (to Help Desk Nook), south (to Lost & Found Counter).",
       "available_commands": {
         "go west": 27,
-        "go north": 30,
+        "go east": 30,
         "go south": 34
       },
       "items": [
@@ -376,8 +378,8 @@
       "brief_description": "LOCATION 29\nPrinters, paper trays, and toner smell.",
       "long_description": "LOCATION 29\nThe print lab feels like a production line for deadlines. A printer jams, someone sighs, and the\nworld continues. A label maker sits on a table like it has authority.\n\nExits: west (to Help Desk Nook), north (to Underground Tunnel).",
       "available_commands": {
-        "go west": 31,
-        "go east": 30
+        "go west": 30,
+        "go north": 31
       },
       "items": [
         "sticker sheet",
@@ -391,12 +393,11 @@
       "brief_description": "LOCATION 30\nA tiny counter, a bell, and too many forms.",
       "long_description": "LOCATION 30\nA tiny help desk nook with a bell you definitely shouldn’t ring. A stack of forms sits neatly,\nlike paperwork is a hobby. Someone left a calculator here—probably by accident, probably not.\n\nExits: west (to Student Commons), east (to Print Lab).",
       "available_commands": {
-        "go south": 28,
+        "go west": 28,
         "go east": 29
       },
       "items": [
         "calculator",
-        "lab access form",
         "marker"
       ]
     },
@@ -404,10 +405,10 @@
       "id": 31,
       "name": "Underground Tunnel",
       "brief_description": "LOCATION 31\nA narrow underground tunnel beneath campus.",
-      "long_description": "LOCATION 31\nThe tunnel is low and concrete-lined, lit by flickering fluorescent lights that hum just loudly\nenough to be unsettling. Old pipes run along the ceiling, wrapped in peeling insulation. This\nfeels like infrastructure students were never meant to see—just a forgotten artery beneath\ncampus, connecting places without asking permission.\n\nExits: west (to Robarts Entrance), east (to Print Lab).",
+      "long_description": "LOCATION 31\nThe tunnel is low and concrete-lined, lit by flickering fluorescent lights that hum just loudly\nenough to be unsettling. Old pipes run along the ceiling, wrapped in peeling insulation. This\nfeels like infrastructure students were never meant to see—just a forgotten artery beneath\ncampus, connecting places without asking permission.\n\nExits: north (to Robarts Entrance), south (to Print Lab).",
       "available_commands": {
         "go north": 11,
-        "go east": 29
+        "go south": 29
       },
       "items": []
     },
@@ -422,7 +423,10 @@
       "items": [],
       "rewards": {
         "attributes": {"signed extension form": "extra time granted"},
-        "items": {"lab access form":  "laptop charger"}
+        "items": {"lab access form": "laptop charger"},
+        "rewards": {
+          "attributes": {"signed extension request": "extra time granted"}
+        }
       }
     },
     {
@@ -435,10 +439,7 @@
       },
       "items": [],
       "rewards": {
-        "items": [],
-        "rewards": {
-          "items": {"coffee": "lab access form"}
-        }
+        "items": {"coffee": "lab access form"}
       }
     },
     {
@@ -460,16 +461,16 @@
       "completion_text": "You plug the USB in. The files are there. For the first time today, you breathe.",
       "start_position": 12,
       "target_position": 1,
-      "target_points": 20
+      "target_points": 30
     },
     {
       "name": "laptop charger",
       "description": "A familiar charger brick. Your battery is not going to survive without it.",
       "hint": "Power belongs near the desk that refuses to sleep.",
       "completion_text": "The charging light flicks on. Time just became negotiable again.",
-      "start_position": 32,
+      "start_position": 21,
       "target_position": 1,
-      "target_points": 20
+      "target_points": 30
     },
     {
       "name": "lucky mug",
@@ -478,7 +479,7 @@
       "completion_text": "You set the mug down carefully. Superstition satisfied.",
       "start_position": 5,
       "target_position": 1,
-      "target_points": 20
+      "target_points": 30
     },
     {
       "name": "student card",
@@ -618,10 +619,10 @@
     {
       "name": "spare usb cable",
       "description": "A spare USB cable. Underrated hero.",
-      "hint": "Backups belong near the lab machines.",
-      "completion_text": "You coil it near the terminals. Redundancy achieved.",
+      "hint": "If the USB drive is missing, this can still save your submission at your dorm.",
+      "completion_text": "You plug in the spare cable setup. Not pretty, but it works.",
       "start_position": 18,
-      "target_position": 21,
+      "target_position": 1,
       "target_points": 2
     },
     {
