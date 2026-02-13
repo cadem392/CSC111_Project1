@@ -27,23 +27,32 @@ class Location:
     """A location in our text adventure game world.
 
     Instance Attributes:
-        - # TODO Describe each instance attribute here
+        - id_num: the numeric id used to identify this location.
+        - description: text metadata for this location. Expected keys are
+          ``name``, ``brief_description``, and ``long_description``.
+        - available_commands: mapping of valid movement commands at this location
+          to destination location ids.
+        - items: names of items currently present at this location.
+        - restrictions: optional restriction payload describing required items
+          to enter this location.
+        - rewards: optional reward payload describing item trades or attribute
+          rewards available at this location.
+        - visited: whether this location has been visited by the player in the
+          current run.
 
     Representation Invariants:
-        - # TODO Describe any necessary representation invariants
+        - self.id_num >= 0
+        - all(key in self.description for key in {'name', 'brief_description', 'long_description'})
+        - all(isinstance(obj, str) and obj != '' for obj in self.description)
+        - all(isinstance(obj, str) for obj in self.description.values())
+        - all(isinstance(item, str) and item != '' for item in self.items)
     """
-
-    # This is just a suggested starter class for Location.
-    # You may change/add parameters and the data available for each Location object as you see fit.
-    #
-    # The only thing you must NOT change is the name of this class: Location.
-    # All locations in your game MUST be represented as an instance of this class.
 
     id_num: int
     description: dict[str, str]
     available_commands: dict[str, int]
     items: list[str]
-    restrictions: Any
+    restrictions: str
     rewards: Any
     visited: bool = False
 
@@ -53,19 +62,23 @@ class Item:
     """An item in our text adventure game world.
 
     Instance Attributes:
-        - # TODO Describe each instance attribute here
+        - name: the canonical item name used in commands.
+        - description: short description shown to the player.
+        - hint: hint text shown when the item is inspected.
+        - completion_text: message shown when the item is returned correctly.
+        - start_position: id of the starting location containing this item.
+        - target_position: id of the location where this item should be returned.
+        - target_points: points awarded for returning this item to target_position.
 
     Representation Invariants:
-        - # TODO Describe any necessary representation invariants
+        - self.name != ''
+        - self.description != ''
+        - self.hint != ''
+        - self.completion_text != ''
+        - self.start_position >= 0
+        - self.target_position >= 0
+        - self.target_points >= 0
     """
-
-    # NOTES:
-    # This is just a suggested starter class for Item.
-    # You may change these parameters and the data available for each Item object as you see fit.
-    # (The current parameters correspond to the example in the handout).
-    #
-    # The only thing you must NOT change is the name of this class: Item.
-    # All item objects in your game MUST be represented as an instance of this class.
 
     name: str
     description: str
@@ -76,13 +89,9 @@ class Item:
     target_points: int
 
     def __str__(self) -> str:
+        """Return a user-friendly item label."""
         return self.name.capitalize() + " - " + self.description
 
-
-# Note: Other entities you may want to add, depending on your game plan:
-# - Puzzle class to represent special locations (could inherit from Location class if it seems suitable)
-# - Player class
-# etc.
 
 if __name__ == "__main__":
     # pass

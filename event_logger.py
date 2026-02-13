@@ -58,9 +58,6 @@ class EventList:
     first: Optional[Event]
     last: Optional[Event]
 
-    # Note: You may ADD parameters/attributes/methods to this class as you see fit.
-    # But do not rename or remove any existing methods/attributes in this class
-
     def __init__(self) -> None:
         """Initialize a new empty event list."""
 
@@ -82,9 +79,6 @@ class EventList:
             string += str(f"Location: {curr.id_num}, Command: {curr.next_command} \n")
             curr = curr.next
         return string
-
-    # Complete the methods below, based on the given descriptions. Do NOT change any of their specifications.
-    #  That is, the function headers (parameters, return type, etc.) must NOT be changed.
 
     def is_empty(self) -> bool:
         """Return whether this event list is empty.
@@ -126,7 +120,6 @@ class EventList:
         >>> evnt_lst.last.prev == evnt2
         True
         """
-        # Hint: You should update the previous node's <next_command> as needed
 
         last = self.last
 
@@ -161,7 +154,6 @@ class EventList:
         >>> evnt_lst.is_empty()
         True
         """
-        # Hint: The <next_command> and <next> attributes for the new last event should be updated as needed
 
         if self.last is None:
             return

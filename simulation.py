@@ -46,15 +46,8 @@ class AdventureGameSimulation:
         """
         self._events = EventList()
         self._game = AdventureGame(game_data_file, initial_location_id)
-
-        # Hint: self._game.get_location() gives you back the current location
-
         initial_location = self._game.get_location()
-
         self._events.add_event(Event(initial_location.id_num, initial_location.description['brief_description']))
-
-        # Hint: Call self.generate_events with the appropriate arguments
-
         self.generate_events(commands, self._game.get_location())
 
     def generate_events(self, commands: list[str], current_location: Location) -> None:
@@ -107,15 +100,14 @@ class AdventureGameSimulation:
         Get back a list of all location IDs in the order that they are visited within a game simulation
         that follows the given commands.
 
-        >>> sim = AdventureGameSimulation('sample_locations.json', 1, ["go east"])
+        >>> sim = AdventureGameSimulation('game_data.json', 2, ["go west"])
         >>> sim.get_id_log()
-        [1, 2]
+        [2, 3]
 
-        >>> sim = AdventureGameSimulation('sample_locations.json', 1, ["go east", "go east", "buy coffee"])
+        >>> sim = AdventureGameSimulation('game_data.json', 2, ["go west", "go west", "inventory"])
         >>> sim.get_id_log()
-        [1, 2, 3, 3]
+        [2, 3, 4, 4]
         """
-        # Note: We have completed this method for you. Do NOT modify it for A1.
 
         return self._events.get_id_log()
 
@@ -123,7 +115,6 @@ class AdventureGameSimulation:
         """
         Run the game simulation and print location descriptions.
         """
-        # Note: We have completed this method for you. Do NOT modify it for A1.
 
         current_event = self._events.first  # Start from the first event in the list
 
@@ -146,7 +137,6 @@ if __name__ == "__main__":
     #     'disable': ['R1705', 'E9998', 'E9999', 'static_type_checker']
     # })
 
-    # Demo walkthrough for winning and losing states.
     win_walkthrough = [
         "take tcard",
         "go west", "take signed extension request", "go west", "take dorm key", "go west", "take lucky mug",
@@ -170,13 +160,11 @@ if __name__ == "__main__":
     sim = AdventureGameSimulation('game_data.json', 2, win_walkthrough)
     assert expected_log == sim.get_id_log()
 
-    # Create a list of all the commands needed to walk through your game to reach a 'game over' state.
     lose_demo = ["go west", "go east"] * 33 + ["go west"]  # 67 movement commands
     expected_log = [2] + [3 if i % 2 == 1 else 2 for i in range(1, 67)] + [3]
     sim = AdventureGameSimulation('game_data.json', 2, lose_demo)
     assert expected_log == sim.get_id_log()
 
-    # Feature demos: inventory, score, and enhancement behaviors.
     inventory_demo = ["take tcard", "inventory", "go west",
                       "take signed extension request", "inventory", "go east"]
     expected_log = [2, 2, 2, 3, 3, 3, 2]
@@ -193,7 +181,6 @@ if __name__ == "__main__":
     sim = AdventureGameSimulation('game_data.json', 2, scores_demo)
     assert expected_log == sim.get_id_log()
 
-    # Add more enhancement_demos if you have more enhancements
     enhancement1_demo = [
         "take tcard", "go west", "take signed extension request", "go west", "take dorm key",
         "go east", "go east", "go east", "go south", "go east", "go east",

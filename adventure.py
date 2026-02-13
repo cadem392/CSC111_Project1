@@ -26,9 +26,6 @@ from typing import Optional
 from event_logger import Event, EventList
 from game_entities import Item, Location
 
-
-# Note: You may add helper functions, classes, etc. below as needed
-
 DEFAULT_MIN_SCORE = 60
 DEFAULT_MAX_SCORE = 100
 DEFAULT_MAX_TURNS = 67
@@ -78,6 +75,7 @@ class AdventureGame:
     #   - _locations: a mapping from location id to Location object.
     #                 This represents all the locations in the game.
     #   - _items: a list of Item objects, representing all items in the game.
+    #   - _state: structure containing all the player progress
 
     _locations: dict[int, Location]
     _items: list[Item]
@@ -97,7 +95,7 @@ class AdventureGame:
         self._state = PlayerState()
 
     def __getattr__(self, name: str) -> int:
-        """Provide backwards-compatible access for legacy constant attribute names."""
+        """Provide access for constant attribute names."""
         if name == "MIN_SCORE":
             return DEFAULT_MIN_SCORE
         if name == "MAX_SCORE":
@@ -106,7 +104,8 @@ class AdventureGame:
             return self._state.max_turns
         raise AttributeError(f"{type(self).__name__!r} object has no attribute {name!r}")
 
-    def _load_game_data(self, filename: str) -> tuple[dict[int, Location], list[Item]]:
+    @staticmethod
+    def _load_game_data(filename: str) -> tuple[dict[int, Location], list[Item]]:
         """Load locations/items from a JSON file and return game data objects."""
         with open(filename, 'r', encoding='utf-8') as file:
             data = json.load(file)
@@ -202,10 +201,7 @@ class AdventureGame:
         """Return lowercase names of all items currently in inventory."""
         return {item.name.lower() for item in self.inventory}
 
-    def _required_items_from_rules(
-        self,
-        restrictions: str | list[object] | tuple[object, ...] | set[object] | dict[str, object] | None
-    ) -> set[str]:
+    def _required_items(self, restrictions: str) -> set[str]:
         """Extract required item names from a location restriction payload."""
         if restrictions in ({}, None, ""):
             return set()
@@ -214,37 +210,12 @@ class AdventureGame:
             required = restrictions.strip().lower()
             return {required} if required else set()
 
-        if isinstance(restrictions, (list, tuple, set)):
-            return {str(item).strip().lower() for item in restrictions if str(item).strip()}
-
-        if isinstance(restrictions, dict):
-            required = set()
-
-            one_item = restrictions.get("item")
-            if isinstance(one_item, str) and one_item.strip():
-                required.add(one_item.strip().lower())
-
-            many_items = restrictions.get("items")
-            if isinstance(many_items, (list, tuple, set)):
-                required.update(str(item).strip().lower() for item in many_items if str(item).strip())
-
-            if required:
-                return required
-
-            for key, value in restrictions.items():
-                if key in {"item", "items"}:
-                    continue
-                if isinstance(key, str) and key.strip() and bool(value):
-                    required.add(key.strip().lower())
-
-            return required
-
         return set()
 
     def can_enter_location(self, location_id: int) -> tuple[bool, Optional[str]]:
         """Return whether the player can enter a location, with a failure message if blocked."""
         destination = self.get_location(location_id)
-        required_items = self._required_items_from_rules(destination.restrictions)
+        required_items = self._required_items(destination.restrictions)
         if not required_items:
             return True, None
 
@@ -256,14 +227,13 @@ class AdventureGame:
             return False, f"You need {missing[0]} to enter {destination.description['name']}."
         return False, f"You need {', '.join(missing)} to enter {destination.description['name']}."
 
-    def _merge_string_mapping(self, target: dict[str, str], source: dict[str, object] | None) -> None:
+    def _merge_string_mapping(self, target: dict[str, str], source: dict[str, str] | None) -> None:
         """Merge string-to-string pairs from source into target, lower-casing keys/values."""
-        if not isinstance(source, dict):
+        if source is None:
             return
 
         for key, value in source.items():
-            if isinstance(key, str) and isinstance(value, str):
-                target[key.lower()] = value.lower()
+            target[key.lower()] = value.lower()
 
     def _extract_item_rewards(self, rewards_data: dict[str, object] | None) -> dict[str, str]:
         """Extract item-trade rewards from a location reward payload."""
@@ -292,7 +262,7 @@ class AdventureGame:
         return rewards
 
     def apply_location_rewards(self, trigger_item_name: str) -> list[str]:
-        """Apply location-specific rewards triggered by dropping an item.
+        """Apply location-specific rewards from dropping an item.
 
         Return user-facing messages describing any reward that was applied.
         """
@@ -303,15 +273,12 @@ class AdventureGame:
         self._apply_item_reward(location.id_num, trigger, location.rewards, messages)
 
         attribute_rewards = self._extract_attribute_rewards(location.rewards)
-        extension_trigger = "signed extension request"
-        for candidate_trigger in {trigger, extension_trigger}:
-            if candidate_trigger not in attribute_rewards:
-                continue
-
-            reward_effect = attribute_rewards[candidate_trigger]
+        if trigger in attribute_rewards:
+            reward_effect = attribute_rewards[trigger]
+            candidate_trigger = trigger
             marker = f"attribute:{location.id_num}:{candidate_trigger}->{reward_effect}"
             if marker in self._state.rewards_claimed:
-                continue
+                return messages
 
             if reward_effect == "extra time granted":
                 if not self._state.flags.extension_granted:
@@ -509,6 +476,8 @@ def lose() -> bool:
 
 def _did_player_win(game: AdventureGame) -> bool:
     """Return whether the player has met all win requirements."""
+    if not game.is_unlimited_moves() and game.turn >= game.MAX_TURNS:
+        return False
     return game.score >= game.MIN_SCORE and game.has_required_returns()
 
 

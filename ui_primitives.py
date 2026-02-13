@@ -1,6 +1,6 @@
 """Shared UI primitives for the CSC111 Pygame interface.
 
-This module stores theme constants, drawing helpers, and reusable widgets.
+This module stores theme constants, drawing helpers, and reusable tools.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from typing import Callable, Optional, Sequence
 import pygame
 
 from adventure import AdventureGame
+from game_entities import Location
 
 FLAG_SRCALPHA = getattr(pygame, "SRCALPHA", 0)
 
@@ -43,7 +44,7 @@ HOVER_SHADOW = (30, 56, 95, 42)
 LOGO_FILE = Path(__file__).resolve().parent / "assets" / "uoft_coa.png"
 
 
-@dataclass(frozen=True)
+@dataclass()
 class CardStyle:
     """Style settings for rounded card drawing."""
     fill: tuple[int, int, int] = CARD
@@ -52,7 +53,7 @@ class CardStyle:
     border_width: int = 2
 
 
-@dataclass(frozen=True)
+@dataclass()
 class ChipStyle:
     """Style settings for pill chips."""
     fill: tuple[int, int, int]
@@ -159,7 +160,7 @@ class Button:
     rect: pygame.Rect
     label: str
     callback: Callable[[], None]
-    kind: str = "secondary"  # primary / secondary / ghost
+    kind: str = "secondary"
     enabled: bool = True
 
     def _palette(self, hovered: bool) -> tuple[tuple[int, int, int], tuple[int, int, int]]:
@@ -450,15 +451,14 @@ class MiniMap:
 
     def _visit_neighbors(
         self,
-        location: object,
+        location: Location,
         current_id: int,
-        locations: dict[int, object],
+        locations: dict[int, Location],
     ) -> list[int]:
         """Inspect available commands for a location and place neighbours."""
         current_x, current_y = self.pos[current_id]
         discovered: list[int] = []
-        # Location has available_commands by project design.
-        for command, destination in location.available_commands.items():  # type: ignore[attr-defined]
+        for command, destination in location.available_commands.items():
             if destination not in locations:
                 continue
             direction = self._parse_dir(command)

@@ -316,7 +316,7 @@
         "go east": 23
       },
       "items": [],
-      "restrictions": "student card"
+      "restrictions": "tcard"
     },
     {
       "id": 25,

@@ -117,8 +117,6 @@ class GameUI:
         self.output_scroll = None
         self.actions_scroll = None
 
-    # ---------- Output helpers ----------
-
     def begin_turn(self, label: str) -> None:
         """Clear output and begin a new action."""
         self.output_lines = [f"You chose: {label}"]
@@ -185,8 +183,6 @@ class GameUI:
 
         end_clip(surface, previous_clip)
         self.output_scroll.draw_scrollbar(surface)
-
-    # ---------- Actions ----------
 
     def open_take_modal(self) -> None:
         """Show a modal list of items in the current location."""
@@ -334,8 +330,6 @@ class GameUI:
         if new_location.items:
             self.out("Items here: " + ", ".join(new_location.items))
 
-    # ---------- End screens ----------
-
     def _reset_ui_after_restart(self) -> None:
         """Reset transient UI state after a game restart."""
         self.actions_scroll = None
@@ -402,8 +396,6 @@ class GameUI:
         )
         action = EndScreenView(self.game).show(spec)
         self._apply_end_action(action, can_keep=False)
-
-    # ---------- Layout and rendering helpers ----------
 
     def _create_fonts(self) -> UIFonts:
         """Create all fonts used in the main UI."""
@@ -549,10 +541,10 @@ class GameUI:
     def _fixed_direction_positions(self) -> dict[str, tuple[int, int]]:
         """Return fixed grid positions for cardinal direction buttons."""
         return {
-            "go east": (0, 1),   # top-left
-            "go west": (0, 0),   # top-right
-            "go south": (1, 0),  # bottom-left
-            "go north": (1, 1),  # bottom-right
+            "go east": (0, 1),
+            "go west": (0, 0),
+            "go south": (1, 0),
+            "go north": (1, 1),
         }
 
     def _move_callback(self, command_name: str) -> Callable[[], None]:
@@ -876,7 +868,10 @@ class GameUI:
         if self.game.is_quit_requested():
             return False
 
-        if self.game.score >= self.game.MIN_SCORE and self.game.has_required_returns():
+        reached_turn_cap = not self.game.is_unlimited_moves() and self.game.turn >= self.game.MAX_TURNS
+        if reached_turn_cap:
+            self.lose()
+        elif self.game.score >= self.game.MIN_SCORE and self.game.has_required_returns():
             self.win()
         else:
             self.lose()
@@ -929,10 +924,6 @@ class GameUI:
 
         PYGAME_QUIT()
 
-
-# =====================================================
-# Entrypoint
-# =====================================================
 
 def run_pygame_ui(game_data_json: str = "game_data.json", initial_location_id: int = DEFAULT_START_LOCATION) -> None:
     """Create the game + UI and start the window."""

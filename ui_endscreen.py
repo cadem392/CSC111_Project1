@@ -28,7 +28,7 @@ KEY_ESCAPE = getattr(pygame, "K_ESCAPE", 27)
 KEY_Q = getattr(pygame, "K_q", ord("q"))
 
 
-@dataclass(frozen=True)
+@dataclass()
 class EndScreenSpec:
     """Configuration payload used to render an end screen."""
     title: str
